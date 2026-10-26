@@ -1,0 +1,62 @@
+{% extends "admin/base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<section class="admin-login">
+  <div class="admin-login__glow" aria-hidden="true"></div>
+  <form class="admin-card admin-login__form" method="POST" id="adminLoginForm">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <div class="admin-login__head">
+      <img src="{{ url_for('static', filename='images/logo.svg') }}?v=4" alt="" class="admin-login__logo" width="56" height="56" />
+      <h1>Admin Login</h1>
+      <p>Manage your ENGSAQAWE portfolio</p>
+    </div>
+
+    <div class="admin-login__field">
+      <label for="adminUsername">Username</label>
+      <div class="admin-login__input-wrap">
+        <i class="fa-solid fa-user" aria-hidden="true"></i>
+        <input id="adminUsername" type="text" name="username" required autocomplete="username" placeholder="admin" />
+      </div>
+    </div>
+
+    <div class="admin-login__field">
+      <div class="admin-login__label-row">
+        <label for="adminPassword">Password</label>
+        <a href="https://wa.me/252684421687?text=Hi%20ENGSAQAWE%2C%20I%20need%20help%20resetting%20my%20admin%20password."
+          class="admin-login__forgot" target="_blank" rel="noopener">Forgot password?</a>
+      </div>
+      <div class="admin-login__input-wrap">
+        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+        <input id="adminPassword" type="password" name="password" required autocomplete="current-password" placeholder="••••••••" />
+        <button type="button" class="admin-login__toggle" id="togglePassword" aria-label="Show password" aria-pressed="false">
+          <i class="fa-regular fa-eye" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+
+    <button type="submit" class="admin-btn admin-btn--primary admin-btn--block admin-login__submit">
+      <i class="fa-solid fa-right-to-bracket"></i>
+      <span>Sign in</span>
+    </button>
+
+    <a href="{{ url_for('home') }}" class="admin-link">← Back to website</a>
+  </form>
+</section>
+
+<script>
+  (function () {
+    var btn = document.getElementById("togglePassword");
+    var input = document.getElementById("adminPassword");
+    if (!btn || !input) return;
+    btn.addEventListener("click", function () {
+      var show = input.type === "password";
+      input.type = show ? "text" : "password";
+      btn.setAttribute("aria-pressed", show ? "true" : "false");
+      btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+      btn.innerHTML = show
+        ? '<i class="fa-regular fa-eye-slash" aria-hidden="true"></i>'
+        : '<i class="fa-regular fa-eye" aria-hidden="true"></i>';
+    });
+  })();
+</script>
+{% endblock %}

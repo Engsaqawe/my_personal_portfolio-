@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<section id="home" class="hero fade-in">
+    <div class="hero-content floating-3d">
+        <h1 class="hero-title">Building <span class="text-gradient">Digital</span> Ecosystems</h1>
+        <p class="hero-tagline">Developer | Builder | Educator</p>
+        <p class="hero-description">I craft scalable systems, premium web applications, and empower the next generation of developers through Engsaqawe Academy.</p>
+        <div class="hero-actions">
+            <a href="#portfolio" class="btn-primary">View Portfolio</a>
+            <a href="#academy" class="btn-secondary">Explore Academy</a>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="about-content fade-in">
+    <div class="section-header">
+        <h2 class="section-title">About <span class="text-teal">Me</span></h2>
+        <p class="section-subtitle">The mind behind the code.</p>
+    </div>
+    <div class="about-grid">
+        <div class="about-text">
+            <h2>My Mission</h2>
+            <p>I build digital ecosystems that solve real problems. My journey is driven by a passion for clean code, premium design, and scalable architecture.</p>
+            <p>Beyond building, I am dedicated to educating the next generation of developers through Engsaqawe Academy.</p>
+            
+            <h2 class="mt-4">Core Skills</h2>
+            <div class="skills-marquee">
+                <div class="skills-track">
+                    <div class="skill-card">
+                        <i data-lucide="terminal"></i>
+                        <span>Python</span>
+                    </div>
+                    <div class="skill-card">
+                        <i data-lucide="server"></i>
+                        <span>Flask</span>
+                    </div>
+                    <div class="skill-card">
+                        <i data-lucide="file-json"></i>
+                        <span>JavaScript</span>
+                    </div>
+                    <div class="skill-card">
+                        <i data-lucide="layout"></i>
+                        <span>HTML5/CSS3</span>
+                    </div>
+                    <div class="skill-card">
+                        <i data-lucide="database"></i>
+                        <span>SQLite/MySQL</span>
+                    </div>
+                    <div class="skill-card">
+                        <i data-lucide="pen-tool"></i>
+                        <span>UI/UX Design</span>
+                    </div>
+                    <!-- Duplicate for infinite marquee -->
+                    <div class="skill-card">
+                        <i data-lucide="terminal"></i>
+                        <span>Python</span>
+                    </div>
+                    <div class="skill-card">
+                        <i data-lucide="server"></i>
+                        <span>Flask</span>
+                    </div>
+                    <div class="skill-card">
+                        <i data-lucide="file-json"></i>
+                        <span>JavaScript</span>
+                    </div>
+                    <div class="skill-card">
+                        <i data-lucide="layout"></i>
+                        <span>HTML5/CSS3</span>
+                    </div>
+                    <div class="skill-card">
+                        <i data-lucide="database"></i>
+                        <span>SQLite/MySQL</span>
+                    </div>
+                    <div class="skill-card">
+                        <i data-lucide="pen-tool"></i>
+                        <span>UI/UX Design</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="about-image-container">
+            <div class="spinner-container">
+                <div class="spinner">
+                    <div class="spinner-face face-1"><img src="{{ url_for('static', filename='images/pictures/1.png') }}" onerror="this.src='{{ url_for('static', filename='images/me.png') }}'" alt="Engsaqawe 1"></div>
+                    <div class="spinner-face face-2"><img src="{{ url_for('static', filename='images/pictures/2.png') }}" onerror="this.src='{{ url_for('static', filename='images/me2.png') }}'" alt="Engsaqawe 2"></div>
+                    <div class="spinner-face face-3"><img src="{{ url_for('static', filename='images/pictures/3.png') }}" onerror="this.src='{{ url_for('static', filename='images/me3.png') }}'" alt="Engsaqawe 3"></div>
+                    <div class="spinner-face face-4"><img src="{{ url_for('static', filename='images/pictures/4.png') }}" onerror="this.src='{{ url_for('static', filename='images/me4.png') }}'" alt="Engsaqawe 4"></div>
+                    <div class="spinner-face face-5"><img src="{{ url_for('static', filename='images/pictures/5.png') }}" onerror="this.src='{{ url_for('static', filename='images/me.png') }}'" alt="Engsaqawe 5"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Portfolio Section -->
+<section id="portfolio" class="portfolio-section fade-in">
+    <div class="section-header">
+        <h2 class="section-title">Featured <span class="text-teal">Projects</span></h2>
+        <p class="section-subtitle">A showcase of systems and web applications.</p>
+    </div>
+
+    <div class="portfolio-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="Web Apps">Web Apps</button>
+        <button class="filter-btn" data-filter="Systems">Systems</button>
+        <button class="filter-btn" data-filter="Tools">Tools</button>
+    </div>
+
+    <div class="portfolio-grid" id="portfolioGrid">
+        {% if projects %}
+            {% for project in projects %}
+            <div class="project-card" data-category="{{ project.category }}" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.1">
+                <div class="project-content">
+                    <div class="project-header">
+                        <h3 class="project-title">{{ project.title }}</h3>
+                        <span class="project-category">{{ project.category }}</span>
+                    </div>
+                    <p class="project-desc">{{ project.description }}</p>
+                    <div class="project-tech">
+                        {% for tech in project.tech_stack.split(',') %}
+                        <span class="tech-tag">{{ tech.strip() }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="project-links">
+                        {% if project.live_link %}
+                        <a href="{{ project.live_link }}" target="_blank" class="btn-small">Live Demo</a>
+                        {% endif %}
+                        {% if project.source_link %}
+                        <a href="{{ project.source_link }}" target="_blank" class="btn-small-outline">Source Code</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i data-lucide="layout-grid" class="empty-icon"></i>
+                <p>No projects to display yet. Add projects to the database to see them here.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Academy Preview Section -->
+<section id="academy" class="academy-section fade-in">
+    <div class="section-header">
+        <h2 class="section-title">Engsaqawe <span class="text-teal">Academy</span></h2>
+        <p class="section-subtitle">Learn real-world development skills.</p>
+    </div>
+    
+    <div class="academy-grid">
+        <div class="academy-card" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
+            <i data-lucide="code" class="academy-icon"></i>
+            <h3>Full-Stack Mastery</h3>
+            <p>Master Python, Flask, JS, and modern UI/UX design to build premium applications.</p>
+        </div>
+        <div class="academy-card" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
+            <i data-lucide="database" class="academy-icon"></i>
+            <h3>System Architecture</h3>
+            <p>Learn how to design scalable and secure databases and backend systems.</p>
+        </div>
+        <div class="academy-card" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
+            <i data-lucide="rocket" class="academy-icon"></i>
+            <h3>Launch Your SaaS</h3>
+            <p>Step-by-step guidance on building, launching, and scaling your own digital products.</p>
+        </div>
+    </div>
+    <div class="academy-cta">
+        <a href="#" class="btn-primary">Go to Academy</a>
+    </div>
+</section>
+
+<!-- Certificates Section -->
+<section id="certificates" class="certificates-section fade-in">
+    <div class="section-header">
+        <h2 class="section-title">My <span class="text-teal">Certificates</span></h2>
+        <p class="section-subtitle">Professional qualifications and achievements.</p>
+    </div>
+    <div class="certificates-grid">
+        <!-- Certificate Cards -->
+        <a href="https://new.express.adobe.com/id/urn:aaid:sc:EU:3b5bf125-d435-5612-a1fb-934599f172d3?invite=true&accept=true&promoid=Z2G1FQKR&mv=other" target="_blank" style="text-decoration: none; color: inherit; display: block;">
+            <div class="certificate-card" style="height: 100%;" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
+                <img src="{{ url_for('static', filename='images/pictures/certi1.jpg') }}" alt="Certificate" style="width: 100%; border-radius: 8px; margin-bottom: 20px; object-fit: cover; transform: translateZ(30px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 1px solid var(--bg-tertiary);">
+                <h3>Design Certification</h3>
+                <p>Verified digital certificate on Adobe Express.</p>
+                <div style="margin-top: 20px; transform: translateZ(30px);">
+                    <span class="btn-small-outline" style="width: 100%; display: block; border-color: var(--accent); color: var(--accent);">View Certificate</span>
+                </div>
+            </div>
+        </a>
+        
+        <a href="#" style="text-decoration: none; color: inherit; display: block;">
+            <div class="certificate-card" style="height: 100%;" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
+                <img src="{{ url_for('static', filename='images/pictures/certi1.jpg') }}" alt="Certificate" style="width: 100%; border-radius: 8px; margin-bottom: 20px; object-fit: cover; transform: translateZ(30px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 1px solid var(--bg-tertiary);">
+                <h3>Python Engineering</h3>
+                <p>Mastery in scalable backend architecture and APIs.</p>
+                <div style="margin-top: 20px; transform: translateZ(30px);">
+                    <span class="btn-small-outline" style="width: 100%; display: block;">Coming Soon</span>
+                </div>
+            </div>
+        </a>
+        
+        <a href="#" style="text-decoration: none; color: inherit; display: block;">
+            <div class="certificate-card" style="height: 100%;" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
+                <img src="{{ url_for('static', filename='images/pictures/certi1.jpg') }}" alt="Certificate" style="width: 100%; border-radius: 8px; margin-bottom: 20px; object-fit: cover; transform: translateZ(30px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 1px solid var(--bg-tertiary);">
+                <h3>UI/UX Design</h3>
+                <p>Certified in designing premium user experiences.</p>
+                <div style="margin-top: 20px; transform: translateZ(30px);">
+                    <span class="btn-small-outline" style="width: 100%; display: block;">Coming Soon</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="contact-section fade-in">
+    <div class="section-header">
+        <h2 class="section-title">Let's <span class="text-teal">Connect</span></h2>
+        <p class="section-subtitle">Have a project in mind or want to join the academy?</p>
+    </div>
+    <div class="contact-container" data-tilt data-tilt-max="3" data-tilt-speed="400">
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('home') }}#contact" method="POST" class="contact-form">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="john@example.com">
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="5" required placeholder="How can I help you?"></textarea>
+            </div>
+            <button type="submit" class="btn-primary w-full">Send Message</button>
+        </form>
+    </div>
+</section>
+{% endblock %}

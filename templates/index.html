@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ profile.brand_name if profile else 'ENGSAQAWE' }} — Portfolio</title>
+  <meta name="description" content="{{ settings.get('meta_description', 'ENGSAQAWE portfolio') }}" />
+  <meta name="theme-color" content="#F3F6F1" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="{{ profile.brand_name if profile else 'ENGSAQAWE' }} — {{ settings.get('job_title', 'Software Engineering') }}" />
+  <meta property="og:description" content="{{ profile.tagline if profile else 'Developer · Builder · Educator' }}" />
+  <meta property="og:url" content="{{ settings.get('site_url', 'https://engsaqawe.com') }}" />
+  <meta property="og:image" content="{{ settings.get('site_url', 'https://engsaqawe.com') }}/static/{{ settings.get('og_image_path', 'images/pictures/me.png') }}" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{ profile.brand_name if profile else 'ENGSAQAWE' }}" />
+  <meta name="twitter:description" content="{{ profile.tagline if profile else 'Developer · Builder · Educator' }}" />
+
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}" />
+
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("engsaqawe-theme") || "light";
+        document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=portfolio-story-1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/project-stack.css') }}?v=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/services.css') }}?v=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/affiliates.css') }}?v=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/home-selective-design.css') }}?v=1" />
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "{{ profile.full_name if profile else 'Nor Ali Saqawe' }}",
+      "alternateName": "{{ profile.brand_name if profile else 'ENGSAQAWE' }}",
+      "url": "{{ settings.get('site_url', 'https://engsaqawe.com') }}",
+      "image": "{{ settings.get('site_url', 'https://engsaqawe.com') }}/static/{{ settings.get('og_image_path', 'images/pictures/me.png') }}",
+      "jobTitle": "{{ settings.get('job_title', 'Software Engineer') }}",
+      "description": "{{ profile.hero_subtitle if profile else 'Premium software engineering and digital systems.' }}"
+    }
+  </script>
+</head>
+
+<body>
+  <div class="loader" aria-hidden="true">
+    <div class="loader__inner">
+      <span class="logo-flip logo-flip--loader" aria-hidden="true">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}?v=4" alt="" class="logo-flip__img logo-flip__img--a" width="58" height="58" />
+        <img src="{{ url_for('static', filename='images/logo1.svg') }}?v=4" alt="" class="logo-flip__img logo-flip__img--b" width="58" height="58" />
+      </span>
+      <span class="loader__logo">{{ profile.brand_name if profile else 'ENGSAQAWE' }}</span>
+      <div class="loader__bar"><div class="loader__bar-fill"></div></div>
+      <p class="loader__text">{{ settings.get('loader_text', 'Loading…') }}</p>
+    </div>
+  </div>
+
+  <div class="bg-gradient"></div>
+  <div class="bg-noise"></div>
+  <div class="bg-orbit bg-orbit--one"></div>
+  <div class="bg-orbit bg-orbit--two"></div>
+  <div class="bg-orbit bg-orbit--three"></div>
+  <div class="bg-particles" aria-hidden="true"></div>
+
+  <!-- Background lighting wave -->
+  <div class="light-wave" aria-hidden="true">
+    <svg class="light-wave__svg" viewBox="0 0 1440 320" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#0BA22E" stop-opacity="0.6" />
+          <stop offset="35%" stop-color="#84F000" stop-opacity="0.9" />
+          <stop offset="65%" stop-color="#0BA22E" stop-opacity="0.7" />
+          <stop offset="100%" stop-color="#84F000" stop-opacity="0.5" />
+        </linearGradient>
+        <linearGradient id="waveGradLight" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#0A8A28" stop-opacity="0.55" />
+          <stop offset="30%" stop-color="#1FA8A0" stop-opacity="0.7" />
+          <stop offset="60%" stop-color="#E85D4C" stop-opacity="0.45" />
+          <stop offset="100%" stop-color="#0D7A22" stop-opacity="0.6" />
+        </linearGradient>
+        <filter id="waveGlow">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+        <filter id="waveGlowLight">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+      <path class="light-wave__path light-wave__path--1" d="M0,160 Q360,80 720,160 T1440,160" fill="none" stroke="url(#waveGrad)" stroke-width="1.4" filter="url(#waveGlow)" />
+      <path class="light-wave__path light-wave__path--2" d="M0,180 Q360,100 720,180 T1440,180" fill="none" stroke="url(#waveGrad)" stroke-width="1" opacity="0.75" />
+      <path class="light-wave__path light-wave__path--3" d="M0,140 Q360,60 720,140 T1440,140" fill="none" stroke="url(#waveGrad)" stroke-width="0.8" opacity="0.55" />
+      <path class="light-wave__path light-wave__path--4" d="M0,200 Q360,120 720,200 T1440,200" fill="none" stroke="url(#waveGrad)" stroke-width="0.7" opacity="0.45" />
+    </svg>
+  </div>
+
+  <!-- Custom cursor -->
+  <div class="custom-cursor" aria-hidden="true">
+    <div class="custom-cursor__ring"></div>
+    <div class="custom-cursor__dot"></div>
+  </div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+
+  <header class="nav" id="top">
+    <div class="nav__inner">
+      <a href="#hero" class="nav__brand">
+        <span class="logo-flip logo-flip--nav" aria-hidden="false">
+          <img src="{{ url_for('static', filename='images/logo.svg') }}?v=4" alt="ENGSAQAWE logo" class="logo-flip__img logo-flip__img--a" width="42" height="42" />
+          <img src="{{ url_for('static', filename='images/logo1.svg') }}?v=4" alt="" class="logo-flip__img logo-flip__img--b" width="42" height="42" aria-hidden="true" />
+        </span>
+        <span class="nav__brand-text">
+          <span class="nav__brand-name">{{ profile.brand_name if profile else 'ENGSAQAWE' }}</span>
+          <span class="nav__brand-tagline">{{ profile.tagline if profile else 'Developer · Builder · Educator' }}</span>
+        </span>
+      </a>
+
+      <nav class="nav__links" aria-label="Main navigation">
+        <a href="#hero" class="nav__link">{{ settings.get('nav_home', 'Home') }}</a>
+        <a href="#about" class="nav__link">{{ settings.get('nav_about', 'About') }}</a>
+        {% if services %}<a href="#services" class="nav__link">{{ settings.get('nav_services', 'Services') }}</a>{% endif %}
+        <a href="#portfolio" class="nav__link">{{ settings.get('nav_portfolio', 'Portfolio') }}</a>
+        {% if affiliate_links %}<a href="#affiliates" class="nav__link">{{ settings.get('nav_affiliates', 'Affiliates') }}</a>{% endif %}
+        <a href="{{ url_for('blog_index') }}" class="nav__link">{{ settings.get('nav_blog', 'Blog') }}</a>
+        <a href="{% if settings.get('academy_external_url') %}{{ settings.get('academy_external_url') }}{% else %}{{ url_for('academy.index') }}{% endif %}"
+          class="nav__link nav__link--academy"
+          {% if settings.get('academy_external_url') %}target="_blank" rel="noopener"{% endif %}>{{ settings.get('nav_academy', 'Academy') }}</a>
+        <a href="#certificates" class="nav__link">{{ settings.get('nav_certs', 'Certificates') }}</a>
+        <a href="#contact" class="nav__link nav__link--cta">{{ settings.get('nav_contact', 'Contact') }}</a>
+        <span class="nav__active-indicator" aria-hidden="true"></span>
+      </nav>
+
+      <div class="nav__actions">
+        <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" title="Toggle theme">
+          <i class="fa-solid fa-moon theme-toggle__icon theme-toggle__icon--dark" aria-hidden="true"></i>
+          <i class="fa-solid fa-sun theme-toggle__icon theme-toggle__icon--light" aria-hidden="true"></i>
+        </button>
+        <button class="nav__toggle" aria-label="Toggle navigation" aria-expanded="false">
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <nav class="nav__mobile" aria-label="Mobile navigation">
+      <a href="#hero" class="nav__mobile-link">{{ settings.get('nav_home', 'Home') }}</a>
+      <a href="#about" class="nav__mobile-link">{{ settings.get('nav_about', 'About') }}</a>
+      {% if services %}<a href="#services" class="nav__mobile-link">{{ settings.get('nav_services', 'Services') }}</a>{% endif %}
+      <a href="#portfolio" class="nav__mobile-link">{{ settings.get('nav_portfolio', 'Portfolio') }}</a>
+      {% if affiliate_links %}<a href="#affiliates" class="nav__mobile-link">{{ settings.get('nav_affiliates', 'Affiliates') }}</a>{% endif %}
+        <a href="{{ url_for('blog_index') }}" class="nav__mobile-link">{{ settings.get('nav_blog', 'Blog') }}</a>
+      <a href="{% if settings.get('academy_external_url') %}{{ settings.get('academy_external_url') }}{% else %}{{ url_for('academy.index') }}{% endif %}"
+        class="nav__mobile-link"
+        {% if settings.get('academy_external_url') %}target="_blank" rel="noopener"{% endif %}>{{ settings.get('nav_academy', 'Academy') }}</a>
+      <a href="#certificates" class="nav__mobile-link">{{ settings.get('nav_certs', 'Certificates') }}</a>
+      <a href="#contact" class="nav__mobile-link nav__mobile-link--cta">{{ settings.get('nav_contact', 'Contact') }}</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="section hero" id="hero">
+      <div class="hero__grid container">
+        <div class="hero__content">
+          <h1 class="hero__title pop-up-text" id="hero-title">
+            <span class="hero__brand">{{ profile.brand_name if profile else 'ENGSAQAWE' }}</span>
+          </h1>
+          <p class="eyebrow pop-up-text">{{ settings.get('hero_eyebrow', profile.tagline if profile else 'Developer · Builder · Educator') }}</p>
+
+          <p class="hero__typewriter" aria-live="polite">
+            <span class="hero__typewriter-prefix">{{ settings.get('typewriter_prefix', 'I build ') }}</span>
+            <span id="typewriter-text" class="hero__typewriter-word"
+              data-phrases="{{ typewriter_phrases|join('||') }}"></span>
+            <span class="hero__typewriter-cursor" aria-hidden="true">|</span>
+          </p>
+
+          <p class="hero__subtitle pop-up-text">
+            {{ profile.hero_subtitle if profile and profile.hero_subtitle else 'I make websites, apps, and systems. This is my work.' }}
+          </p>
+
+          <div class="hero__actions pop-up-text">
+            <button class="btn btn--primary magnetic" data-scroll-to="#portfolio">
+              <span>{{ settings.get('hero_cta_primary', 'View Portfolio') }}</span><i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <button class="btn btn--ghost magnetic" data-scroll-to="#about">
+              <span>{{ settings.get('hero_cta_secondary', 'About Me') }}</span><i class="fa-regular fa-user"></i>
+            </button>
+          </div>
+
+          <div class="hero__stats">
+            <div class="stat-card tilt-card pop-up-text" data-tilt data-tilt-max="8">
+              <p class="stat-card__label"><i class="fa-solid fa-code"></i> {{ settings.get('stat_projects_label', 'Projects') }}</p>
+              <p class="stat-card__value" data-stat-target="{{ projects|length }}">0</p>
+            </div>
+            <div class="stat-card tilt-card pop-up-text" data-tilt data-tilt-max="8">
+              <p class="stat-card__label"><i class="fa-solid fa-bolt"></i> {{ settings.get('stat_performance_label', 'Performance') }}</p>
+              <p class="stat-card__value" data-stat-target="{{ settings.get('stat_performance_value', '95') }}">0</p>
+            </div>
+            <div class="stat-card tilt-card pop-up-text" data-tilt data-tilt-max="8">
+              <p class="stat-card__label"><i class="fa-solid fa-layer-group"></i> {{ settings.get('stat_skills_label', 'Skills') }}</p>
+              <p class="stat-card__value" data-stat-target="{{ settings.get('stat_skills_value', '6') }}">0</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero__visual hero__visual--portrait-showcase">
+          <span class="hero-visual-orbit hero-visual-orbit--outer" aria-hidden="true"></span>
+          <span class="hero-visual-orbit hero-visual-orbit--inner" aria-hidden="true"></span>
+          <span class="hero-visual-glow hero-visual-glow--green" aria-hidden="true"></span>
+          <span class="hero-float-chip hero-float-chip--top" aria-hidden="true"><i class="fa-solid fa-code"></i> Web and systems</span>
+          <span class="hero-float-chip hero-float-chip--side" aria-hidden="true"><i class="fa-solid fa-language"></i> Somali and English</span>
+          <div class="hero__portrait-wrap tilt-card" data-tilt data-tilt-max="10">
+            <div class="hero__portrait-glow"></div>
+            <img src="{{ url_for('static', filename=hero_image) }}"
+              alt="{{ profile.full_name if profile else 'Nor Ali Saqawe' }}, professional portrait"
+              class="hero__portrait" width="520" height="650" loading="eager" />
+            <div class="hero__portrait-badge glass">
+              <i class="fa-solid fa-code"></i>
+              <span>{{ settings.get('hero_badge', 'Open for work') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHAT I DO -->
+    {% set skills_st = split_title(settings.get('skills_title', 'Things I|build')) %}
+    <section class="section showcase" id="skills">
+      <div class="section__header container">
+        <h2 class="section__title split-title pop-up-text">{{ skills_st[0] }} <span class="text-accent">{{ skills_st[1] }}</span></h2>
+        <p class="eyebrow pop-up-text">{{ settings.get('skills_eyebrow', 'What I Do') }}</p>
+        <p class="section__subtitle pop-up-text">{{ settings.get('skills_subtitle', '') }}</p>
+      </div>
+
+      <div class="showcase__fan container">
+        {% for card in skills_cards %}
+        <article class="showcase-card tilt-card pop-up-text" data-tilt data-tilt-max="12">
+          <div class="showcase-card__icon"><i class="fa-solid {{ card.icon }}"></i></div>
+          <h3>{{ card.title }}</h3>
+          <p>{{ card.text }}</p>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    {% set about_st = split_title(settings.get('about_title', 'About|Me')) %}
+    <section class="section about" id="about">
+      <div class="section__header container">
+        <h2 class="section__title split-title pop-up-text">{{ about_st[0] }} <span class="text-accent">{{ about_st[1] }}</span></h2>
+        <p class="eyebrow pop-up-text">{{ settings.get('about_eyebrow', 'About') }}</p>
+        <p class="section__subtitle pop-up-text">{{ settings.get('about_intro') or ((profile.full_name if profile else 'Nor Ali Saqawe') ~ ' — ' ~ (profile.tagline if profile else 'Developer · Builder · Educator')) }}</p>
+      </div>
+
+      <div class="about__grid container">
+        <div class="about__gallery">
+          <div class="about__gallery-main tilt-card" data-tilt data-tilt-max="8">
+            <img src="{{ url_for('static', filename=gallery[0].image_url if gallery else hero_image) }}" alt="Nor Ali Saqawe portrait"
+              class="about__photo about__photo--main" loading="lazy" />
+          </div>
+          <div class="about__gallery-strip">
+            {% for item in gallery %}
+            <button class="about__thumb{% if loop.first %} is-active{% endif %}" type="button"
+              data-photo="{{ url_for('static', filename=item.image_url) }}" aria-label="View photo {{ loop.index }}">
+              <img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.label or '' }}" loading="lazy" />
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="about__panels">
+          <div class="about__panel glass reveal-card">
+            <h3><i class="fa-solid fa-bullseye" aria-hidden="true"></i> {{ settings.get('mission_label', 'Mission') }}</h3>
+            <p class="scroll-emphasis">{{ profile.mission if profile else '' }}</p>
+          </div>
+          <div class="about__panel glass reveal-card">
+            <h3><i class="fa-solid fa-eye" aria-hidden="true"></i> {{ settings.get('vision_label', 'Vision') }}</h3>
+            <p class="scroll-emphasis">{{ profile.vision if profile else '' }}</p>
+          </div>
+
+          <div class="about__timeline">
+            {% for item in timeline_items %}
+            <article class="timeline-item reveal-card">
+              <div class="timeline-item__dot"></div>
+              <div class="timeline-item__content glass">
+                <h4>{{ item.title }}</h4>
+                <p class="timeline-item__meta">{{ item.meta }}</p>
+                <p>{{ item.body }}</p>
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+
+          <div class="about__skills glass reveal-card">
+            <h3>{{ settings.get('technologies_label', 'Technologies') }}</h3>
+            <div class="chip-row chip-row--tech">
+              {% for tech in tech_list %}
+              {% set meta = tech_meta(tech) %}
+              <span class="chip chip--tech {{ meta.class }}">
+                <i class="{{ meta.icon }}"></i>
+                <span>{{ meta.label }}</span>
+              </span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {% if services %}
+    {% set services_title = split_title(settings.get('services_title', 'I’m a freelancer: here’s|what I do')) %}
+    <section class="section services" id="services" aria-labelledby="services-title">
+      <div class="container">
+        <header class="services__header">
+          <h2 class="section__title" id="services-title" data-reveal style="--i:1">{{ services_title[0] }} <span class="text-accent">{{ services_title[1] }}</span></h2>
+          <p class="eyebrow" data-reveal>{{ settings.get('services_eyebrow', 'Freelance services') }}</p>
+          <p class="section__subtitle" data-reveal style="--i:2">{{ settings.get('services_subtitle', 'Five ways I can help with your project. Pick one service or combine them, then tell me what you need.') }}</p>
+        </header>
+        <ul class="services__grid" role="list">
+          {% for service in services %}
+          <li class="services__item">
+            <article class="service-card" data-reveal data-service data-service-id="{{ service.slug }}" style="--ac:{{ service.accent_color }};--i:{{ loop.index0 }}">
+              <div class="service-card__art" aria-hidden="true">
+                {% if service.art_type == 'web' %}<div class="art art--web"><i></i><i></i><i></i><i></i></div>
+                {% elif service.art_type == 'stack' %}<div class="art art--stack"><b>UI</b><b>API</b><b>DB</b></div>
+                {% elif service.art_type == 'lang' %}<div class="art art--lang"><b>Salaan</b><i>⇄</i><b>Hello</b></div>
+                {% elif service.art_type == 'net' %}<div class="art art--net"><svg viewBox="0 0 170 86" aria-hidden="true"><path d="M22 16 L85 43 M22 70 L85 43 M148 43 L85 43"/></svg><span></span><span></span><span></span><em><i class="fa-solid fa-link"></i></em></div>
+                {% else %}<div class="art art--learn"><p><i class="fa-solid fa-check"></i>Learn it</p><p><i class="fa-solid fa-check"></i>Practice it</p><p><i aria-hidden="true"></i>Use it</p></div>{% endif %}
+              </div>
+              <div class="service-card__head"><span class="service-card__icon"><i class="{{ service.icon_class }}" aria-hidden="true"></i></span><span class="service-card__num" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span></div>
+              <h3 class="service-card__title">{{ service.title }}</h3>
+              <p class="service-card__text">{{ service.description }}</p>
+              {% set service_tags = (service.tags or '').splitlines() %}
+              {% if service_tags %}<ul class="service-card__tags" aria-label="Focus areas">{% for tag in service_tags if tag.strip() %}<li>{{ tag.strip() }}</li>{% endfor %}</ul>{% endif %}
+              <a class="service-card__cta" href="{{ service.cta_url }}" {% if service.cta_url.startswith('https://') %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ service.cta_label }} <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </article>
+          </li>
+          {% endfor %}
+        </ul>
+        <div class="services__cta" data-reveal style="--i:2">
+          <p>{{ settings.get('services_cta_title', 'Not sure which service fits?') }}<small>{{ settings.get('services_cta_text', 'Tell me about your idea and we will work out the best next step.') }}</small></p>
+          <a class="btn btn--primary" href="#contact"><span>{{ settings.get('services_cta_label', 'Let’s talk') }}</span><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></a>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    <!-- Projects -->
+    {% set port_st = split_title(settings.get('portfolio_title', 'My|Projects')) %}
+    <section class="section portfolio stack-portfolio" id="portfolio">
+      <div class="section__header container stack-portfolio__header">
+        <h2 class="section__title split-title pop-up-text">{{ port_st[0] }} <span class="text-accent">{{ port_st[1] }}</span></h2>
+        <p class="eyebrow pop-up-text">{{ settings.get('portfolio_eyebrow', 'Portfolio') }}</p>
+        <p class="section__subtitle pop-up-text">{{ settings.get('portfolio_subtitle', 'Selected work, experiments, and systems in progress.') }}</p>
+      </div>
+      {% if projects %}
+      <div class="portfolio__controls container stack-portfolio__filters">
+        {% for f in portfolio_filters %}<button type="button" class="chip chip--filter{% if loop.first %} chip--active{% endif %}" data-filter="{{ f.value }}">{{ f.label }}</button>{% endfor %}
+      </div>
+      <div class="stack-progress" aria-hidden="true"><span id="stackProgress"></span></div>
+      {% endif %}
+      <div class="stack-work" id="stackWork">
+        {% for project in projects %}
+        {% set project_image = project.image_url or '' %}
+        {% set feature_list = (project.features or '').split('|') %}
+        {% set tech_list_for_project = (project.tech_stack or '').split(',') %}
+        <div class="stack-slot" data-stack-slot>
+          <article class="stack-card stack-card--database" data-stack-card data-category="{{ project.category }}" data-visual="database">
+            <div class="stack-card__panel">
+              <div class="stack-card__picture">
+                {% if project_image %}<div class="stack-card__media">{% if project_image.startswith('http://') or project_image.startswith('https://') or project_image.startswith('/static/') %}<img src="{{ project_image }}" alt="{{ project.title }} project preview" loading="lazy">{% else %}<img src="{{ url_for('static', filename=project_image) }}" alt="{{ project.title }} project preview" loading="lazy">{% endif %}</div>{% else %}<div class="stack-card__media stack-card__media--placeholder" aria-hidden="true"><span>{{ project.title[:1]|upper }}</span></div>{% endif %}
+                <span class="stack-badge">{{ project.category or 'Project' }}</span>
+              </div>
+              <div class="stack-card__details">
+                <div class="stack-card__body">
+                  <span class="stack-title-mask"><h3>{{ project.title }}</h3></span>
+                  <span class="stack-title-mask"><p class="stack-lead">{{ project.description }}</p></span>
+                  <ul class="stack-features">
+                    {% for feature in feature_list if feature.strip() %}<li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg>{{ feature.strip() }}</li>{% endfor %}
+                  </ul>
+                  {% if project.challenges %}<p class="stack-copy"><b>Challenge:</b> {{ project.challenges }}</p>{% endif %}
+                  {% if project.solutions %}<p class="stack-copy"><b>Solution:</b> {{ project.solutions }}</p>{% endif %}
+                  <div class="stack-chips">{% for label in tech_list_for_project if label.strip() %}<span><i>{{ label.strip()[:2]|upper }}</i>{{ label.strip() }}</span>{% endfor %}</div>
+                  <div class="stack-actions">
+                    {% if project.live_link %}<a class="stack-button stack-button--live" href="{{ project.live_link }}" target="_blank" rel="noopener noreferrer"><span>Live Demo</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>{% endif %}
+                    {% if project.source_link %}<a class="stack-button stack-button--github" href="{{ project.source_link }}" target="_blank" rel="noopener noreferrer"><span>GitHub</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></svg></a>{% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+        {% endfor %}
+      </div>
+      {% if projects %}
+      <div class="stack-counter" id="stackCounter" aria-hidden="true">
+        <div class="stack-counter__dots">{% for project in projects %}<i {% if loop.first %}class="is-active"{% endif %}></i>{% endfor %}</div>
+        <b id="stackCounterNumber">01</b><span>/ {{ '%02d'|format(projects|length) }}</span>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- AFFILIATE RECOMMENDATIONS -->
+    {% if affiliate_links %}
+    {% set affiliate_title = split_title(settings.get('affiliate_title', 'Tools I|recommend')) %}
+    <section class="section affiliate-section" id="affiliates" aria-labelledby="affiliates-title">
+      <div class="container">
+        <header class="affiliate__header">
+          <h2 class="section__title" id="affiliates-title" data-reveal style="--i:1">{{ affiliate_title[0] }} <span class="text-accent">{{ affiliate_title[1] }}</span></h2>
+          <p class="eyebrow" data-reveal>{{ settings.get('affiliate_eyebrow', 'Affiliate links') }}</p>
+          <p class="section__subtitle" data-reveal style="--i:2">{{ settings.get('affiliate_subtitle', 'Services and tools you may find useful for your own website or project.') }}</p>
+        </header>
+        <aside class="affiliate__disclosure" role="note" data-reveal style="--i:3">
+          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+          <div><strong>{{ settings.get('affiliate_disclosure_title', 'Affiliate disclosure') }}</strong><p>{{ settings.get('affiliate_disclosure', 'Some links may be affiliate links. I may receive a commission if you purchase through them.') }}</p></div>
+        </aside>
+        <ul class="affiliate__grid" role="list">
+        {% for item in affiliate_links %}
+        <li class="affiliate-item">
+          <article class="affiliate-card" data-reveal style="--i:{{ loop.index0 }}">
+            <div class="affiliate-card__thumb">
+              <span class="affiliate-card__tag">{{ settings.get('affiliate_tag_label', 'Affiliate link') }}</span>
+              {% if item.image_url %}<img src="{{ item.image_url }}" alt="" loading="lazy" referrerpolicy="no-referrer">{% else %}<span class="affiliate-card__mono" aria-hidden="true">{{ item.label[:1]|upper }}</span>{% endif %}
+            </div>
+            <div class="affiliate-card__body">
+              <h3 class="affiliate-card__title">{{ item.label }}</h3>
+              <p class="affiliate-card__text">{{ item.description or settings.get('affiliate_description', 'A service worth exploring for your next project.') }}</p>
+              <a class="affiliate-card__cta" href="{{ item.url }}" target="_blank" rel="sponsored noopener noreferrer" aria-label="{{ settings.get('affiliate_button_label', 'Visit website') }}: {{ item.label }} (opens in a new tab)"><span>{{ settings.get('affiliate_button_label', 'Visit website') }}</span><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+            </div>
+          </article>
+        </li>
+        {% endfor %}
+        </ul>
+      </div>
+    </section>
+    {% endif %}
+
+    <!-- ACADEMY -->
+    {% set acad_st = split_title(settings.get('academy_title', 'ENGSAQAWE|Academy')) %}
+    <section class="section academy academy--feature" id="academy">
+      {% set academy_panel_url = settings.get('academy_external_url') or url_for('academy.index') %}
+      <div class="academy-feature-panel container">
+        <div class="academy-feature-copy">
+          <h2 class="section__title split-title pop-up-text">{{ acad_st[0] }} <span>{{ acad_st[1] }}</span></h2>
+          <p class="eyebrow pop-up-text">{{ settings.get('academy_eyebrow', 'Academy') }}</p>
+          <p class="section__subtitle pop-up-text">{{ settings.get('academy_subtitle', 'Practical online courses with structured lessons, progress tracking, and a learning space you can return to anytime.') }}</p>
+          <ul class="academy-feature-points" aria-label="Academy features">
+            <li><i class="fa-solid fa-circle-play"></i> Video lessons you can revisit</li>
+            <li><i class="fa-solid fa-chart-line"></i> Track your learning progress</li>
+            <li><i class="fa-solid fa-infinity"></i> Learn at your own pace</li>
+          </ul>
+          <a href="{{ academy_panel_url }}" class="btn btn--primary btn--sm magnetic" {% if settings.get('academy_external_url') %}target="_blank" rel="noopener"{% endif %}>
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>{{ settings.get('academy_external_label', 'Browse courses') }}</span>
+          </a>
+        </div>
+        <div class="academy-feature-courses" aria-label="Featured Academy courses">
+          {% for course in courses[:2] %}
+          <article class="academy-feature-course pop-up-text" style="--i:{{ loop.index0 }}">
+            <a class="academy-feature-course__cover" href="{{ url_for('academy.course_detail', course_id=course.id) }}" aria-label="View {{ course.title }}">
+              {% if course.thumbnail_url %}<img src="{{ course.thumbnail_url }}" alt="" loading="lazy">{% else %}<i class="fa-solid {{ course.icon or 'fa-book-open' }}" aria-hidden="true"></i>{% endif %}
+              <span>{{ course.level or 'Course' }}</span>
+            </a>
+            <div class="academy-feature-course__body">
+            <p class="academy-feature-course__meta"><i class="fa-solid fa-circle-play"></i> {{ course.lesson_count }} lessons, {{ course.currency or 'USD' }} {{ '%.2f'|format(course.price|float) if course.price|float > 0 else 'Free' }}</p>
+              <h3><a href="{{ url_for('academy.course_detail', course_id=course.id) }}">{{ course.title }}</a></h3>
+              <p>{{ course.description }}</p>
+              <a class="academy-feature-course__link" href="{{ url_for('academy.course_detail', course_id=course.id) }}">Explore course <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+          </article>
+          {% else %}
+          <div class="academy-feature-empty"><span><i class="fa-solid fa-book-open"></i></span><h3>{{ settings.get('academy_empty_title', 'New courses are coming soon.') }}</h3><p>{{ settings.get('academy_empty', 'Check back soon for practical courses and guided lessons.') }}</p></div>
+          {% endfor %}
+          {% if courses|length > 2 %}<a class="academy-feature-all" href="{{ academy_panel_url }}" {% if settings.get('academy_external_url') %}target="_blank" rel="noopener"{% endif %}>View all courses <i class="fa-solid fa-arrow-right"></i></a>{% endif %}
+        </div>
+      </div>
+    </section>
+
+    <!-- BLOG -->
+    {% if blog_posts %}
+    {% set blog_st = split_title(settings.get('blog_title', 'From the|Journal')) %}
+    <section class="section blog-preview" id="blog">
+      <div class="section__header container">
+        <h2 class="section__title">{{ blog_st[0] }} <span class="text-accent">{{ blog_st[1] }}</span></h2>
+        <p class="eyebrow">{{ settings.get('blog_eyebrow', 'Ideas & Notes') }}</p>
+        <p class="section__subtitle">{{ settings.get('blog_subtitle', '') }}</p>
+      </div>
+      <div class="blog-grid container">
+        {% for post in blog_posts %}
+        <article class="blog-card glass">
+          {% if post.cover_image %}<a href="{{ url_for('blog_post', slug=post.slug) }}"><img src="{{ url_for('static', filename=post.cover_image) }}" alt="" loading="lazy"></a>{% endif %}
+          <div class="blog-card__body">
+            <p class="blog-card__meta">{{ post.category or 'Technology' }}{% if post.published_at %}, {{ post.published_at.strftime('%b %d, %Y') }}{% endif %}</p>
+            <h3><a href="{{ url_for('blog_post', slug=post.slug) }}">{{ post.title }}</a></h3>
+            <p>{{ post.excerpt or '' }}</p>
+            <a class="link-button" href="{{ url_for('blog_post', slug=post.slug) }}">{{ settings.get('blog_read_more', 'Read article') }} <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      <div class="container blog-preview__all"><a class="btn btn--ghost btn--sm" href="{{ url_for('blog_index') }}">{{ settings.get('footer_blog_all', 'All articles') }} <i class="fa-solid fa-arrow-right"></i></a></div>
+    </section>
+    {% endif %}
+
+    <!-- CERTIFICATES -->
+    {% set cert_st = split_title(settings.get('certs_title', 'My|Certificates')) %}
+    <section class="section certificates" id="certificates">
+      <div class="section__header container section__header--row">
+        <div>
+          <h2 class="section__title split-title pop-up-text">{{ cert_st[0] }} <span class="text-accent">{{ cert_st[1] }}</span></h2>
+          <p class="eyebrow pop-up-text">{{ settings.get('certs_eyebrow', 'Certificates') }}</p>
+          <p class="section__subtitle pop-up-text">{{ settings.get('certs_subtitle', '') }}</p>
+        </div>
+        {% if certificates %}
+        <button type="button" class="btn btn--ghost btn--sm magnetic certificates__toggle" id="seeAllCerts" aria-expanded="false">
+          <i class="fa-solid fa-certificate"></i>
+          <span id="seeAllCertsLabel">{{ settings.get('certs_see_all', 'See all') }}</span>
+        </button>
+        {% endif %}
+      </div>
+
+      <div class="certificates__grid container" id="certificatesGrid">
+        {% for cert in certificates %}
+        <article class="certificate-card glass tilt-card pop-up-text{% if loop.index > 3 %} certificate-card--extra{% endif %}" data-cert-item>
+          <div class="certificate-card__image-wrap">
+            <img src="{{ url_for('static', filename=cert.image_url) }}" alt="{{ cert.title }}" loading="lazy"
+              class="certificate-card__image" />
+            <span class="certificate-card__stamp"><i class="fa-solid fa-certificate"></i> Certificate</span>
+          </div>
+          <div class="certificate-card__body">
+            <h3>{{ cert.title }}</h3>
+            <p class="certificate-card__meta">{{ cert.year }}, {{ cert.issuer }}</p>
+            <p>{{ cert.description }}</p>
+            <div class="certificate-card__footer">
+              <a href="{{ cert_preview_href(cert) }}" class="link-button" target="_blank" rel="noopener">
+                <i class="fa-regular fa-eye"></i><span>{{ settings.get('certs_preview_label', 'Preview') }}</span>
+              </a>
+              <a href="{{ cert_download_href(cert) }}" class="link-button" download>
+                <i class="fa-solid fa-download"></i><span>{{ settings.get('certs_download_label', 'Download') }}</span>
+              </a>
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    {% set contact_st = split_title(settings.get('contact_title', "Let’s|Connect")) %}
+    {% set wa_cc = settings.get('whatsapp_country_code', '252') %}
+    {% set wa_num = profile.whatsapp if profile and profile.whatsapp else '684421687' %}
+    <section class="section contact" id="contact">
+      <div class="section__header container">
+        <h2 class="section__title split-title pop-up-text">{{ contact_st[0] }} <span class="text-accent">{{ contact_st[1] }}</span></h2>
+        <p class="eyebrow pop-up-text">{{ settings.get('contact_eyebrow', 'Contact') }}</p>
+        <p class="section__subtitle pop-up-text">{{ settings.get('contact_subtitle', '') }}</p>
+      </div>
+
+      <div class="contact__grid container">
+        <form class="contact__form glass reveal-card" id="contact-form" method="POST" action="{{ url_for('home') }}#contact">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          <div class="flash-stack">
+            {% for category, message in messages %}
+            <div class="flash flash--{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% endwith %}
+
+          <div class="contact__row">
+            <div class="field">
+              <label for="name">{{ settings.get('contact_name_label', 'Name') }}</label>
+              <input id="name" name="name" type="text" required placeholder="{{ settings.get('contact_name_placeholder', 'Your name') }}" />
+              <span class="field__error"></span>
+            </div>
+            <div class="field">
+              <label for="email">{{ settings.get('contact_email_field_label', 'Email') }}</label>
+              <input id="email" name="email" type="email" required placeholder="{{ settings.get('contact_email_placeholder', 'you@company.com') }}" />
+              <span class="field__error"></span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="projectType">{{ settings.get('contact_type_label', 'Project type') }}</label>
+            <select id="projectType" name="projectType">
+              <option value="">{{ settings.get('contact_select_placeholder', 'Select an option (optional)') }}</option>
+              {% for opt in project_type_options %}
+              <option value="{{ opt }}">{{ opt }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label for="message">{{ settings.get('contact_message_label', 'Message') }}</label>
+            <textarea id="message" name="message" rows="4" maxlength="250" required placeholder="{{ settings.get('contact_message_placeholder', 'Tell me about your project…') }}"></textarea>
+            <span class="message-count" aria-live="polite"><span id="messageCount">0</span> of 250 maximum. {{ settings.get('contact_char_limit_hint', '250 characters maximum') }}</span>
+            <span class="field__error"></span>
+          </div>
+          <button type="submit" class="btn btn--primary magnetic w-full">
+            <span>{{ settings.get('contact_submit', 'Send message') }}</span><i class="fa-solid fa-paper-plane"></i>
+          </button>
+        <p class="contact__hint"><i class="fa-solid fa-database" aria-hidden="true"></i> {{ settings.get('contact_hint', '') }}</p>
+        </form>
+
+        <aside class="contact__aside">
+          <div class="contact__card glass reveal-card">
+            <h3><i class="fa-solid fa-location-dot" aria-hidden="true"></i> {{ settings.get('contact_location_label', 'Location') }}</h3>
+            <p>{{ profile.location_note if profile else 'Remote-friendly' }}</p>
+          </div>
+          <div class="contact__card glass reveal-card">
+            <h3><i class="fa-solid fa-envelope" aria-hidden="true"></i> {{ settings.get('contact_email_label', 'Email') }}</h3>
+            <a href="mailto:{{ profile.email if profile else 'hello@engsaqawe.com' }}">{{ profile.email if profile else 'hello@engsaqawe.com' }}</a>
+          </div>
+          <div class="contact__card glass reveal-card">
+            <h3>{{ settings.get('contact_social_label', 'Social') }}</h3>
+            <ul class="social-list social-list--grid">
+              <li><a href="{{ profile.github_url if profile else 'https://github.com' }}" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i><span>GitHub</span></a></li>
+              <li><a href="{{ profile.linkedin_url if profile else 'https://linkedin.com' }}" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i><span>LinkedIn</span></a></li>
+              <li><a href="https://wa.me/{{ wa_cc }}{{ wa_num }}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span></a></li>
+              <li><a href="{{ profile.facebook_url if profile and profile.facebook_url else 'https://facebook.com/engsaqawe' }}" target="_blank" rel="noopener"><i class="fa-brands fa-facebook"></i><span>Facebook</span></a></li>
+              <li><a href="{{ profile.youtube_url if profile and profile.youtube_url else 'https://youtube.com/@engsaqawe' }}" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i><span>YouTube</span></a></li>
+              {% if profile and profile.twitter_url %}
+              <li><a href="{{ profile.twitter_url }}" target="_blank" rel="noopener"><i class="fa-brands fa-x-twitter"></i><span>X / Twitter</span></a></li>
+              {% endif %}
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner container">
+      <div class="footer__brand">
+        <span class="logo-flip logo-flip--footer">
+          <img src="{{ url_for('static', filename='images/logo.svg') }}?v=4" alt="" class="logo-flip__img logo-flip__img--a" width="36" height="36" />
+          <img src="{{ url_for('static', filename='images/logo1.svg') }}?v=4" alt="" class="logo-flip__img logo-flip__img--b" width="36" height="36" aria-hidden="true" />
+        </span>
+        <span class="footer__logo">{{ profile.brand_name if profile else 'ENGSAQAWE' }}</span>
+        <p>© <span id="year"></span> {{ profile.full_name if profile else 'Nor Ali Saqawe' }}. {{ settings.get('footer_rights', 'All rights reserved.') }}</p>
+        <a href="{{ url_for('admin.login') }}" class="footer__admin-link"><i class="fa-solid fa-lock"></i> {{ settings.get('footer_admin_label', 'Admin login') }}</a>
+        <div class="footer__social">
+          <a href="{{ profile.github_url if profile else 'https://github.com' }}" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+          <a href="{{ profile.linkedin_url if profile else 'https://linkedin.com' }}" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+          <a href="{{ profile.facebook_url if profile and profile.facebook_url else 'https://facebook.com/engsaqawe' }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+          <a href="{{ profile.youtube_url if profile and profile.youtube_url else 'https://youtube.com/@engsaqawe' }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+          <a href="https://wa.me/{{ wa_cc }}{{ wa_num }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+        </div>
+      </div>
+      {% if footer_projects %}
+      <div class="footer__column footer__projects">
+        <h3>{{ settings.get('footer_projects_heading', 'Selected projects') }}</h3>
+        <ul>{% for project in footer_projects %}<li><a href="{{ project.live_link or '#portfolio' }}" {% if project.live_link %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ project.title }}</a></li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+      {% if footer_links %}
+      <div class="footer__columns">
+        {% for section_title, group in footer_link_groups %}
+        <div class="footer__column">
+          <h3>{{ section_title }}</h3>
+          <ul>{% for item in group %}<li><a href="{{ item.url }}" {% if item.url.startswith('http') %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ item.label }}</a></li>{% endfor %}</ul>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <button class="btn btn--outline btn--sm magnetic scroll-top-btn" id="scrollTop" type="button" aria-label="{{ settings.get('footer_back_top', 'Back to top') }}">
+        <i class="fa-solid fa-arrow-up"></i><span>{{ settings.get('footer_back_top', 'Back to top') }}</span>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Fixed WhatsApp with scroll progress ring -->
+  <a href="https://wa.me/{{ wa_cc }}{{ wa_num }}?text={{ settings.get('whatsapp_prefill', 'Hi ENGSAQAWE, I saw your portfolio.')|urlencode }}"
+    class="fab fab--whatsapp" id="whatsappFab" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+    <svg class="fab__ring" viewBox="0 0 56 56" aria-hidden="true">
+      <circle class="fab__ring-bg" cx="28" cy="28" r="24" />
+      <circle class="fab__ring-progress" cx="28" cy="28" r="24" id="scrollProgressRing" />
+    </svg>
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
+
+  <button class="fab fab--top scroll-top-fab" id="scrollTopFab" type="button" aria-label="Back to top">
+    <svg class="fab__ring" viewBox="0 0 56 56" aria-hidden="true">
+      <circle class="fab__ring-bg" cx="28" cy="28" r="24" />
+      <circle class="fab__ring-progress fab__ring-progress--top" cx="28" cy="28" r="24" id="scrollProgressRingTop" />
+    </svg>
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <div class="modal" id="cert-modal" aria-hidden="true" role="dialog">
+    <div class="modal__backdrop" data-modal-close></div>
+    <div class="modal__dialog glass modal__dialog--wide">
+      <button class="modal__close" data-modal-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      <h3 id="cert-modal-title">{{ settings.get('certs_modal_title', 'All Certificates') }}</h3>
+      <p class="modal__subtitle">{{ settings.get('certs_modal_subtitle', 'Qualifications and professional awards.') }}</p>
+      <div class="modal__cert-grid" id="certModalGrid">
+        {% for cert in certificates %}
+        <article class="certificate-card glass">
+          <div class="certificate-card__image-wrap">
+            <img src="{{ url_for('static', filename=cert.image_url) }}" alt="{{ cert.title }}" loading="lazy" />
+          </div>
+          <div class="certificate-card__body">
+            <h3>{{ cert.title }}</h3>
+            <p class="certificate-card__meta">{{ cert.year }}, {{ cert.issuer }}</p>
+            <div class="certificate-card__footer">
+              <a href="{{ cert_preview_href(cert) }}" class="link-button" target="_blank" rel="noopener">
+                <i class="fa-regular fa-eye"></i><span>Preview</span>
+              </a>
+              <a href="{{ cert_download_href(cert) }}" class="link-button" download>
+                <i class="fa-solid fa-download"></i><span>Download</span>
+              </a>
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}?v=portfolio-story-1" defer></script>
+  <script src="{{ url_for('static', filename='js/project-stack.js') }}?v=1" defer></script>
+  <script src="{{ url_for('static', filename='js/services.js') }}?v=1" defer></script>
+  <script src="{{ url_for('static', filename='js/affiliates.js') }}?v=1" defer></script>
+</body>
+
+</html>

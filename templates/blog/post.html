@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ post.seo_title or post.title }} · ENGSAQAWE</title>
+  <meta name="description" content="{{ post.seo_description or post.excerpt or '' }}">
+  <meta name="csrf-token" content="{{ session.blog_csrf_token }}">
+  <link rel="canonical" href="{{ request.url }}">
+  <meta property="og:type" content="article"><meta property="og:title" content="{{ post.seo_title or post.title }}"><meta property="og:description" content="{{ post.seo_description or post.excerpt or '' }}">
+  {% if post.cover_image %}<meta property="og:image" content="{{ url_for('static', filename=post.cover_image, _external=True) }}">{% endif %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=blog-actions-1"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body class="blog-page">
+  <header class="nav nav--simple"><div class="nav__inner container"><a class="nav__brand" href="{{ url_for('home') }}"><span class="nav__brand-name">ENGSAQAWE</span></a><nav class="nav__links"><a class="nav__link" href="{{ url_for('home') }}">Home</a><a class="nav__link" href="{{ url_for('blog_index') }}">Blog</a><a class="nav__link" href="{{ url_for('home') }}#contact">Contact</a></nav></div></header>
+  <main class="blog-article container">
+    <a class="blog-back" href="{{ url_for('blog_index') }}"><i class="fa-solid fa-arrow-left"></i> All articles</a>
+    <header class="blog-article__header"><p class="blog-card__meta">{{ post.category or 'Technology' }}{% if post.published_at %} · {{ post.published_at.strftime('%b %d, %Y') }}{% endif %} · {{ post.author or 'ENGSAQAWE' }}</p><h1>{{ post.title }}</h1>{% if post.excerpt %}<p>{{ post.excerpt }}</p>{% endif %}<div class="blog-article__stats"><span><i class="fa-regular fa-eye"></i> <strong>{{ views }}</strong> views</span><span><i class="fa-regular fa-comment"></i> <strong>{{ comments|length }}</strong> comments</span></div></header>
+    {% if post.cover_image %}<img class="blog-article__cover" src="{{ url_for('static', filename=post.cover_image) }}" alt="" fetchpriority="high">{% endif %}
+    <article class="blog-article__body">{{ post.body }}</article>
+    {% if post.tags %}<p class="blog-article__tags">{{ post.tags }}</p>{% endif %}
+    <section class="blog-reactions" aria-label="Article feedback" data-react-url="{{ url_for('blog_react', slug=post.slug) }}">
+      <p>Was this article helpful?</p>
+      <button type="button" data-reaction="like" aria-pressed="{{ 'true' if my_reaction == 'like' else 'false' }}"><i class="fa-regular fa-thumbs-up"></i> Helpful <span>{{ reactions.get('like', 0) }}</span></button>
+      <button type="button" data-reaction="dislike" aria-pressed="{{ 'true' if my_reaction == 'dislike' else 'false' }}"><i class="fa-regular fa-thumbs-down"></i> Not helpful <span>{{ reactions.get('dislike', 0) }}</span></button>
+      <span class="blog-reactions__status" role="status" aria-live="polite"></span>
+    </section>
+    <section class="blog-comments" id="comments">
+      <h2>Comments <span>({{ comments|length }})</span></h2>
+      {% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<p class="blog-flash blog-flash--{{ category }}" role="status">{{ message }}</p>{% endfor %}{% endwith %}
+      <form class="blog-comment-form" method="POST" action="{{ url_for('blog_post', slug=post.slug) }}#comments">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="csrf_token" value="{{ session.blog_csrf_token }}">
+        <label>Your name<input name="name" required minlength="2" maxlength="80" autocomplete="name"></label>
+        <label>Your comment<textarea name="comment" required minlength="3" maxlength="1200" rows="4"></textarea></label>
+        <p>Your comment will be visible after it has been reviewed.</p>
+        <button class="btn btn--primary" type="submit">Submit comment</button>
+      </form>
+      <div class="blog-comment-list">{% for comment in comments %}<article class="blog-comment"><header><strong>{{ comment.name }}</strong><time>{{ comment.created_at.strftime('%b %d, %Y') if comment.created_at else '' }}</time></header><p>{{ comment.body }}</p></article>{% else %}<p class="blog-comment-empty">Be the first to comment.</p>{% endfor %}</div>
+    </section>
+  </main>
+  <script>
+    document.querySelectorAll('.blog-reactions button[data-reaction]').forEach((button) => button.addEventListener('click', async () => {
+      const panel = button.closest('.blog-reactions');
+      const status = panel.querySelector('.blog-reactions__status');
+      panel.querySelectorAll('button').forEach((item) => item.disabled = true);
+      try {
+        const response = await fetch(panel.dataset.reactUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content }, body: JSON.stringify({ reaction: button.dataset.reaction }) });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Could not save your feedback.');
+        panel.querySelector('[data-reaction="like"] span').textContent = data.likes;
+        panel.querySelector('[data-reaction="dislike"] span').textContent = data.dislikes;
+        panel.querySelectorAll('button').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+        status.textContent = 'Thanks for your feedback.';
+      } catch (error) { status.textContent = error.message; }
+      finally { panel.querySelectorAll('button').forEach((item) => item.disabled = false); }
+    }));
+  </script>
+</body>
+</html>

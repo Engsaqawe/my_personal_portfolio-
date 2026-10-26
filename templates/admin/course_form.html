@@ -1,0 +1,20 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if course else 'New' }} Course{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div><h1>{{ 'Edit' if course else 'New' }} Course</h1></div>
+  <a href="{{ url_for('admin.courses_list') }}" class="admin-btn admin-btn--ghost">← Back</a>
+</header>
+<form class="admin-card admin-form" method="POST">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <div class="admin-form__grid">
+    <label>Title<input type="text" name="title" value="{{ course.title if course else '' }}" required /></label>
+    <label>Modules<input type="text" name="modules" value="{{ course.modules if course else '' }}" placeholder="6 modules" /></label>
+    <label>Progress %<input type="number" name="progress" min="0" max="100" value="{{ course.progress if course else 0 }}" /></label>
+    <label>Icon class<input type="text" name="icon" value="{{ course.icon if course else 'fa-code' }}" placeholder="fa-code" /></label>
+    <label>Sort order<input type="number" name="sort_order" value="{{ course.sort_order if course else 0 }}" /></label>
+  </div>
+  <label>Description<textarea name="description" rows="4" required>{{ course.description if course else '' }}</textarea></label>
+  <button type="submit" class="admin-btn admin-btn--primary">Save course</button>
+</form>
+{% endblock %}

@@ -1,0 +1,5 @@
+{% extends "academy/base.html" %}
+{% block title %}Student sign in{% endblock %}
+{% block content %}
+<main class="academy-auth"><a class="academy-public__brand" href="{{ url_for('academy.index') }}"><i class="fa-solid fa-graduation-cap"></i> ENGSAQAWE Academy</a><form class="academy-auth__card" method="post"><p class="academy-kicker">WELCOME BACK</p><h1>Sign in to learn</h1><p>Continue your courses and pick up where you left off.</p><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="next" value="{{ next }}"><label>Email address<input type="email" name="email" autocomplete="email" required></label><label>Password<input type="password" name="password" autocomplete="current-password" required></label><button class="academy-cta academy-cta--full">Sign in <i class="fa-solid fa-arrow-right"></i></button><span class="academy-auth__foot">New to the Academy? <a href="{{ url_for('academy.register') }}">Create an account</a></span></form></main>
+{% endblock %}

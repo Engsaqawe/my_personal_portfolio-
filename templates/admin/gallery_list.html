@@ -1,0 +1,26 @@
+{% extends "admin/base.html" %}
+{% block title %}Photos{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div><h1>Photos</h1><p>Gallery and hero portrait.</p></div>
+  <a href="{{ url_for('admin.gallery_form') }}" class="admin-btn admin-btn--primary"><i class="fa-solid fa-upload"></i> Upload photo</a>
+</header>
+<div class="admin-gallery-grid">
+  {% for g in gallery %}
+  <article class="admin-card admin-gallery-item">
+    <img src="{{ url_for('static', filename=g.image_url) }}" alt="{{ g.label }}" />
+    <div class="admin-gallery-item__meta">
+      <strong>{{ g.label or 'Photo' }}</strong>
+      {% if g.is_hero %}<span class="admin-badge">Hero</span>{% endif %}
+      <div class="admin-table__actions">
+        <a href="{{ url_for('admin.gallery_form', item_id=g.id) }}" class="admin-btn admin-btn--sm">Edit</a>
+        <form method="POST" action="{{ url_for('admin.gallery_delete', item_id=g.id) }}" onsubmit="return confirm('Delete photo?')">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="admin-btn admin-btn--sm admin-btn--danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% endblock %}

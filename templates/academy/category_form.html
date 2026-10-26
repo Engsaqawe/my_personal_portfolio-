@@ -1,0 +1,6 @@
+{% extends "academy/base.html" %}
+{% block title %}{{ 'Edit' if category else 'New' }} category{% endblock %}
+{% block content %}
+<header class="acad-header"><div><h1>{{ 'Edit' if category else 'New' }} category</h1><p>Categories appear in the course catalog filters.</p></div><a href="{{ url_for('academy.categories_list') }}" class="acad-btn acad-btn--ghost">← Back</a></header>
+<form class="acad-card acad-form" method="post"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><label>Category name<input name="name" maxlength="100" value="{{ category.name if category else '' }}" required placeholder="Web Development"></label><label>Description<textarea name="description" rows="3" maxlength="500">{{ category.description if category else '' }}</textarea></label><label>Sort order<input type="number" name="sort_order" value="{{ category.sort_order if category else 0 }}"></label><button class="acad-btn acad-btn--primary">Save category</button></form>
+{% endblock %}

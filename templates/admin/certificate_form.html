@@ -1,0 +1,25 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if certificate else 'New' }} Certificate{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div><h1>{{ 'Edit' if certificate else 'New' }} Certificate</h1></div>
+  <a href="{{ url_for('admin.certificates_list') }}" class="admin-btn admin-btn--ghost">← Back</a>
+</header>
+<form class="admin-card admin-form" method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <div class="admin-form__grid">
+    <label>Title<input type="text" name="title" value="{{ certificate.title if certificate else '' }}" required /></label>
+    <label>Issuer<input type="text" name="issuer" value="{{ certificate.issuer if certificate else '' }}" /></label>
+    <label>Year<input type="text" name="year" value="{{ certificate.year if certificate else '' }}" /></label>
+    <label>Display rank (1 appears first)<input type="number" name="sort_order" min="1" value="{{ certificate.sort_order if certificate else '' }}" /><small>Only the first three are shown initially.</small></label>
+  </div>
+  <label>Description<textarea name="description" rows="3">{{ certificate.description if certificate else '' }}</textarea></label>
+  <div class="admin-form__grid">
+    <label>Preview URL<input type="url" name="preview_url" value="{{ certificate.preview_url if certificate else '' }}" /></label>
+    <label>Download URL<input type="text" name="download_url" value="{{ certificate.download_url if certificate else '' }}" /></label>
+  </div>
+  <label>Certificate image<input type="file" name="image" accept="image/*" /></label>
+  {% if certificate %}<div class="admin-preview"><img src="{{ url_for('static', filename=certificate.image_url) }}" alt="" /></div>{% endif %}
+  <button type="submit" class="admin-btn admin-btn--primary">Save</button>
+</form>
+{% endblock %}

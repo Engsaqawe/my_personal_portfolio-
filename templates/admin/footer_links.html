@@ -1,0 +1,15 @@
+{% extends "admin/base.html" %}
+{% block title %}Footer Links{% endblock %}
+{% block content %}
+<header class="admin-header"><div><h1>Footer links</h1><p>Build groups such as Projects, Websites, or Affiliate links. Add any custom group you need.</p></div></header>
+<form class="admin-card admin-form" method="POST">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <h2>Add a footer link</h2>
+  <div class="admin-form__grid"><label>Section name<input name="section_title" required placeholder="Projects, Websites, Affiliate links…"></label><label>Link label<input name="label" required placeholder="My latest project"></label><label>URL<input name="url" required placeholder="/ or https://example.com"></label><label>Link order<input type="number" name="sort_order" value="0"></label><label>Section order<input type="number" name="section_order" value="0"></label><label class="admin-check"><input type="checkbox" name="is_active" checked> Show on website</label></div>
+  <button class="admin-btn admin-btn--primary" type="submit">Add link</button>
+</form>
+<div class="admin-card admin-table-wrap"><table class="admin-table admin-table--responsive"><thead><tr><th>Section</th><th>Label</th><th>URL</th><th>Visible</th><th>Actions</th></tr></thead><tbody>
+{% for item in links %}<tr><td data-label="Section">{{ item.section_title }}</td><td data-label="Label">{{ item.label }}</td><td data-label="URL">{{ item.url }}</td><td data-label="Visible">{{ 'Yes' if item.is_active else 'No' }}</td><td data-label="Actions" class="admin-table__actions"><a class="admin-btn admin-btn--sm" href="{{ url_for('admin.footer_link_edit', item_id=item.id) }}">Edit</a><form method="POST" action="{{ url_for('admin.footer_link_delete', item_id=item.id) }}" onsubmit="return confirm('Delete this footer link?')">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="admin-btn admin-btn--sm admin-btn--danger">Delete</button></form></td></tr>{% else %}<tr><td colspan="5" class="admin-muted">No custom footer links yet. Use the form above to add them.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

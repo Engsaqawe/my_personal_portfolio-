@@ -1,0 +1,7 @@
+{% extends "academy/base.html" %}
+{% block title %}Lessons{% endblock %}
+{% block content %}
+<header class="acad-header"><div><h1>Lessons</h1><p>Manage video lessons across your courses.</p></div><a class="acad-btn acad-btn--primary" href="{{ url_for('academy.courses_list') }}"><i class="fa-solid fa-book-open"></i> Choose course</a></header>
+<form class="acad-filterbar" method="get"><label class="acad-search"><i class="fa-solid fa-magnifying-glass"></i><input type="search" name="q" value="{{ search }}" placeholder="Search lessons or courses"></label><button class="acad-btn acad-btn--primary">Search</button></form>
+<div class="acad-card acad-table-wrap"><table class="acad-table"><thead><tr><th>Lesson</th><th>Course</th><th>Duration</th><th>Video</th><th>Access</th><th>Actions</th></tr></thead><tbody>{% for lesson in lessons %}<tr><td><strong>{{ lesson.title }}</strong></td><td>{{ lesson.course_title }}</td><td>{{ lesson.duration or '—' }}</td><td><span class="acad-badge acad-badge--active">{{ 'Uploaded file' if lesson.video_url.startswith('/academy/media/') else 'External URL' }}</span></td><td>{{ 'Preview' if lesson.is_preview else 'Students' }}</td><td class="acad-table__actions"><a href="{{ url_for('academy.lessons_list', course_id=lesson.course_id) }}" class="acad-btn acad-btn--sm">Manage course lessons</a></td></tr>{% else %}<tr><td colspan="6" class="acad-muted">No lessons yet. Open a course and upload its first video lesson.</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

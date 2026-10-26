@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ENGSAQAWE | Developer, Builder, Educator{% endblock %}</title>
+    <meta name="description" content="Engsaqawe - The central digital hub of my personal brand. Portfolio, projects, and Engsaqawe Academy.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#home" class="brand-logo" style="display: flex; align-items: center; gap: 12px;">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="ENGSAQAWE Logo" class="logo-img">
+                <span>ENGSAQAWE<span class="dot">.</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#portfolio" class="nav-link">Portfolio</a>
+                <a href="#academy" class="nav-link academy-link">Academy</a>
+                <a href="#certificates" class="nav-link">Certificates</a>
+                <a href="#contact" class="btn-primary-outline nav-link">Contact</a>
+            </div>
+            <button class="mobile-menu-btn" aria-label="Toggle Menu">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="brand-info">
+                <h3>ENGSAQAWE<span class="dot">.</span></h3>
+                <p>Developer | Builder | Educator</p>
+            </div>
+            <div class="social-links">
+                <a href="#" aria-label="Github"><i data-lucide="github"></i></a>
+                <a href="#" aria-label="Twitter"><i data-lucide="twitter"></i></a>
+                <a href="#" aria-label="LinkedIn"><i data-lucide="linkedin"></i></a>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2026 ENGSAQAWE. All rights reserved.
+        </div>
+    </footer>
+
+    <button class="scroll-top" id="scrollTop" aria-label="Scroll to Top">
+        <i data-lucide="chevron-up"></i>
+    </button>
+
+    <!-- Custom JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+      lucide.createIcons();
+    </script>
+</body>
+</html>

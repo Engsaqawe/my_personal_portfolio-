@@ -1,0 +1,7 @@
+{% extends "admin/base.html" %}
+{% block title %}Edit footer link{% endblock %}
+{% block content %}
+<header class="admin-header"><div><h1>Edit footer link</h1></div><a href="{{ url_for('admin.footer_links') }}" class="admin-btn admin-btn--ghost">← Back</a></header>
+<form class="admin-card admin-form" method="POST">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><div class="admin-form__grid"><label>Section name<input name="section_title" required value="{{ item.section_title }}"></label><label>Link label<input name="label" required value="{{ item.label }}"></label><label>URL<input name="url" required value="{{ item.url }}"></label><label>Link order<input type="number" name="sort_order" value="{{ item.sort_order }}"></label><label>Section order<input type="number" name="section_order" value="{{ item.section_order }}"></label><label class="admin-check"><input type="checkbox" name="is_active" {% if item.is_active %}checked{% endif %}> Show on website</label></div><button class="admin-btn admin-btn--primary" type="submit">Save link</button></form>
+{% endblock %}

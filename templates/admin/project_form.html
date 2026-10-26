@@ -1,0 +1,39 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if project else 'New' }} Project{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div><h1>{{ 'Edit' if project else 'New' }} Project</h1></div>
+  <a href="{{ url_for('admin.projects_list') }}" class="admin-btn admin-btn--ghost">← Back</a>
+</header>
+
+<form class="admin-card admin-form" method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <div class="admin-form__grid">
+    <label>Title<input type="text" name="title" value="{{ project.title if project else '' }}" required /></label>
+    <label>Category
+      <select name="category">
+        {% for cat in ['saas', 'enterprise', 'experiments'] %}
+        <option value="{{ cat }}" {% if project and project.category == cat %}selected{% endif %}>{{ cat|title }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Sort order<input type="number" name="sort_order" value="{{ project.sort_order if project else 0 }}" /></label>
+    <label class="admin-check"><input type="checkbox" name="featured" {% if not project or project.featured %}checked{% endif %} /> Show on site</label>
+  </div>
+
+  <label>Description<textarea name="description" rows="3" required>{{ project.description if project else '' }}</textarea></label>
+  <label>Features (separate with |)<textarea name="features" rows="2">{{ project.features if project else '' }}</textarea></label>
+  <label>Challenge<textarea name="challenges" rows="2">{{ project.challenges if project else '' }}</textarea></label>
+  <label>Solution<textarea name="solutions" rows="2">{{ project.solutions if project else '' }}</textarea></label>
+  <label>Tech stack (comma separated)<input type="text" name="tech_stack" value="{{ project.tech_stack if project else '' }}" placeholder="Python,Flask,MySQL" /></label>
+  <div class="admin-form__grid">
+    <label>Live demo URL<input type="url" name="live_link" value="{{ project.live_link if project else '' }}" /></label>
+    <label>GitHub URL<input type="url" name="source_link" value="{{ project.source_link if project else '' }}" /></label>
+  </div>
+  <label>Project image<input type="file" name="image" accept="image/*" /></label>
+  {% if project and project.image_url %}
+  <div class="admin-preview"><img src="{{ url_for('static', filename=project.image_url) }}" alt="" /></div>
+  {% endif %}
+  <button type="submit" class="admin-btn admin-btn--primary">Save project</button>
+</form>
+{% endblock %}

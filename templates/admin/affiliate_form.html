@@ -1,0 +1,20 @@
+{% extends "admin/base.html" %}
+{% block title %}Edit Affiliate Link{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div><h1>Edit affiliate link</h1><p>Changes appear in the Affiliates section below Projects.</p></div>
+  <a href="{{ url_for('admin.affiliates_list') }}" class="admin-btn admin-btn--ghost">← Back</a>
+</header>
+<form class="admin-card admin-form" method="POST">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <div class="admin-form__grid">
+    <label>Link name<input name="label" required value="{{ item.label }}"></label>
+    <label>Destination URL<input name="url" type="url" required value="{{ item.url }}"></label>
+    <label>Thumbnail URL<input name="image_url" type="text" value="{{ item.image_url or '' }}" placeholder="https://example.com/logo-or-product-image.jpg"><small>Optional. Use an HTTPS image URL or a file under /static/.</small></label>
+    <label class="admin-form__full">Card description<textarea name="description" rows="3" maxlength="500" placeholder="A short, accurate description of this product or service.">{{ item.description or '' }}</textarea><small>Optional; the shared fallback description is used when blank.</small></label>
+    <label>Display order<input name="sort_order" type="number" value="{{ item.sort_order }}"></label>
+    <label class="admin-check"><input name="is_active" type="checkbox" {% if item.is_active %}checked{% endif %}> Show on website</label>
+  </div>
+  <button class="admin-btn admin-btn--primary" type="submit">Save link</button>
+</form>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "academy/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<header class="acad-header">
+  <div>
+    <h1>Academy Dashboard</h1>
+    <p>Welcome, {{ admin.full_name or admin.username }}</p>
+  </div>
+</header>
+
+<div class="acad-stats">
+  <div class="acad-stat"><span>{{ stats.courses }}</span><small>Courses</small></div>
+  <div class="acad-stat"><span>{{ stats.students }}</span><small>Students</small></div>
+  <div class="acad-stat"><span>{{ stats.active }}</span><small>Active</small></div>
+  <div class="acad-stat"><span>{{ stats.lessons }}</span><small>Lessons</small></div>
+  <div class="acad-stat"><span>{{ stats.payments }}</span><small>Demo payments</small></div>
+  <div class="acad-stat"><span>{{ "%d"|format(stats.avg_progress|float) }}%</span><small>Avg course progress</small></div>
+</div>
+
+<div class="acad-grid-2">
+  <section class="acad-card">
+    <h2>Quick actions</h2>
+    <div class="acad-actions">
+      <a href="{{ url_for('academy.course_form') }}" class="acad-btn acad-btn--ghost"><i class="fa-solid fa-plus"></i> New course</a>
+      <a href="{{ url_for('academy.student_form') }}" class="acad-btn acad-btn--ghost"><i class="fa-solid fa-user-plus"></i> Add student</a>
+      <a href="{{ url_for('academy.enrollment_form') }}" class="acad-btn acad-btn--ghost"><i class="fa-solid fa-user-check"></i> Add enrollment</a>
+      <a href="{{ url_for('academy.categories_list') }}" class="acad-btn acad-btn--ghost"><i class="fa-solid fa-layer-group"></i> Manage categories</a>
+      <a href="{{ url_for('academy.payments_list') }}" class="acad-btn acad-btn--ghost"><i class="fa-solid fa-receipt"></i> Demo payments</a>
+      <a href="{{ url_for('academy.index') }}" class="acad-btn acad-btn--ghost"><i class="fa-solid fa-eye"></i> View public page</a>
+    </div>
+  </section>
+
+  <section class="acad-card">
+    <h2>Recent students</h2>
+    {% if recent %}
+    <ul class="acad-list">
+      {% for s in recent %}
+      <li>
+        <strong>{{ s.name }}</strong> — {{ s.email }}<br />
+        <small>{{ s.enrollment_count }} enrollment{{ '' if s.enrollment_count == 1 else 's' }} · {{ s.status }}</small>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="acad-muted">No students yet. Enroll your first student.</p>
+    {% endif %}
+  </section>
+</div>
+
+<section class="acad-card" style="margin-top:1rem">
+  <h2>Courses overview</h2>
+  {% if courses %}
+  <div class="acad-course-grid">
+    {% for c in courses %}
+    <article class="acad-course-mini">
+      <i class="fa-solid {{ c.icon }}"></i>
+      <div>
+        <strong>{{ c.title }}</strong>
+        <small>{{ c.lesson_count }} lessons · {{ c.status }} · {{ c.level }}</small>
+      </div>
+      <a href="{{ url_for('academy.course_form', item_id=c.id) }}" class="acad-btn acad-btn--sm">Edit</a>
+      <a href="{{ url_for('academy.lessons_list', course_id=c.id) }}" class="acad-btn acad-btn--sm">Lessons</a>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="acad-muted">No courses yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

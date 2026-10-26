@@ -1,0 +1,23 @@
+{% extends "academy/base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<section class="acad-login">
+  <form class="acad-card acad-login__form" method="POST">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <div class="acad-login__head">
+      <i class="fa-solid fa-graduation-cap"></i>
+      <h1>Academy Panel</h1>
+      <p>Manage courses and students</p>
+    </div>
+    {% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
+    <label class="acad-field">Username
+      <input type="text" name="username" required autocomplete="username" placeholder="admin" />
+    </label>
+    <label class="acad-field">Password
+      <input type="password" name="password" required autocomplete="current-password" placeholder="••••••••" />
+    </label>
+    <button type="submit" class="acad-btn acad-btn--primary acad-btn--block">Sign in</button>
+    <a href="{{ url_for('home') }}" class="acad-link">← Back to website</a>
+  </form>
+</section>
+{% endblock %}

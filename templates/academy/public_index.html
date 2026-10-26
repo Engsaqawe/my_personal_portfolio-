@@ -1,0 +1,34 @@
+{% extends "academy/base.html" %}
+{% block title %}Online courses{% endblock %}
+{% block content %}
+<main class="academy-public">
+  <header class="academy-public__nav">
+    <a class="academy-public__brand" href="{{ url_for('academy.index') }}"><i class="fa-solid fa-graduation-cap"></i> ENGSAQAWE Academy</a>
+    <nav aria-label="Academy navigation">
+      <button type="button" class="academy-theme-toggle" data-academy-theme aria-label="Toggle light and dark theme"><i class="fa-solid fa-moon"></i></button>{% if session.academy_student_id %}<a href="{{ url_for('academy.cart') }}" class="academy-cart-link"><i class="fa-solid fa-bag-shopping"></i> Cart <b>{{ academy_cart_count }}</b></a><a href="{{ url_for('academy.learning') }}">My learning</a><span>Hello, {{ session.academy_student_name }}</span>
+      <form method="post" action="{{ url_for('academy.logout') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="academy-public__text-button">Sign out</button></form>
+      {% else %}<a href="{{ url_for('academy.login') }}">Sign in</a><a class="academy-public__nav-cta" href="{{ url_for('academy.register') }}">Create account</a>{% endif %}
+    </nav>
+  </header>
+  <section class="academy-hero">
+    <div><p class="academy-kicker">LEARN AT YOUR PACE</p><h1>Build skills that<br><em>move you forward.</em></h1><p>Practical online courses with structured lessons, progress tracking, and a learning space you can return to anytime.</p><a class="academy-cta" href="#courses">Explore courses <i class="fa-solid fa-arrow-down"></i></a></div>
+    <div class="academy-hero__art" aria-hidden="true"><div class="academy-hero__orb"><i class="fa-solid fa-play"></i></div><span class="academy-hero__tag">Learn · Practice · Grow</span><span class="academy-hero__spark">✳</span></div>
+  </section>
+  <section class="academy-catalog" id="courses">
+    <div class="academy-section-heading"><div><p class="academy-kicker">THE CATALOG</p><h2>Courses to get you started</h2></div><span>{{ courses|length }} course{{ '' if courses|length == 1 else 's' }}</span></div>
+    <form class="academy-catalog-filter" method="get" action="{{ url_for('academy.index') }}"><label class="academy-catalog-search"><i class="fa-solid fa-magnifying-glass"></i><input type="search" name="q" value="{{ search }}" placeholder="Search courses" aria-label="Search courses"></label><select name="category" aria-label="Filter by category"><option value="">All categories</option>{% for category in categories %}<option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>{{ category.name }}</option>{% endfor %}</select><button class="academy-cta">Find courses</button>{% if search or selected_category %}<a class="academy-filter-reset" href="{{ url_for('academy.index') }}">Clear</a>{% endif %}</form>
+    {% if courses %}<div class="academy-course-cards">
+      {% for course in courses %}
+      <article class="academy-course-card">
+        <a class="academy-course-card__cover" href="{{ url_for('academy.course_detail', course_id=course.id) }}">
+          {% if course.thumbnail_url %}<img src="{{ course.thumbnail_url }}" alt="Cover for {{ course.title }}">{% else %}<i class="fa-solid {{ course.icon or 'fa-book-open' }}"></i>{% endif %}<span>{{ course.level or 'Beginner' }}</span>
+        </a>
+        <div class="academy-course-card__body"><p class="academy-course-card__meta">{{ course.category_name or course.language or 'Course' }} <span>·</span> {{ course.lesson_count }} lesson{{ '' if course.lesson_count == 1 else 's' }}</p><h3><a href="{{ url_for('academy.course_detail', course_id=course.id) }}">{{ course.title }}</a></h3><p>{{ course.description }}</p><div class="academy-course-card__foot"><span class="academy-course-price">{{ course.currency }} {{ '%.2f'|format(course.price|float) if course.price|float > 0 else 'Free' }}</span><a class="academy-course-card__link" href="{{ url_for('academy.course_detail', course_id=course.id) }}">View course <i class="fa-solid fa-arrow-right"></i></a></div><small class="academy-course-likes"><i class="fa-regular fa-heart"></i> {{ course.like_count }} likes</small></div>
+      </article>
+      {% endfor %}
+    </div>{% else %}<div class="academy-empty"><span class="academy-empty__icon"><i class="fa-solid fa-book-open"></i></span><h3>{% if search or selected_category %}No matching courses{% else %}Courses are being prepared{% endif %}</h3><p>{% if search or selected_category %}Try a different search or clear the filters.{% else %}There are no published courses yet. Please check back soon.{% endif %}</p>{% if search or selected_category %}<a class="academy-cta" href="{{ url_for('academy.index') }}">Clear filters</a>{% endif %}</div>{% endif %}
+  </section>
+  <footer class="academy-public__footer">© {{ settings.get('site_title', 'ENGSAQAWE') }} · Academy</footer>
+</main>
+<script src="{{ url_for('static', filename='js/academy.js') }}" defer></script>
+{% endblock %}

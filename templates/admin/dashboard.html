@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div>
+    <h1>Dashboard</h1>
+    <p>Welcome, {{ admin.full_name or admin.username }}</p>
+  </div>
+</header>
+
+<div class="admin-stats">
+  <div class="admin-stat"><span>{{ stats.projects }}</span><small>Projects</small></div>
+  <div class="admin-stat"><span>{{ stats.services }}</span><small>Services</small></div>
+  <div class="admin-stat"><span>{{ stats.blog }}</span><small>Articles</small></div>
+  <div class="admin-stat"><span>{{ stats.gallery }}</span><small>Photos</small></div>
+  <div class="admin-stat"><span>{{ stats.certificates }}</span><small>Certificates</small></div>
+  <div class="admin-stat"><span>{{ stats.courses }}</span><small>Courses</small></div>
+  <div class="admin-stat"><span>{{ stats.contacts }}</span><small>Messages</small></div>
+</div>
+
+<div class="admin-grid-2">
+  <section class="admin-card">
+    <h2>Quick actions</h2>
+    <div class="admin-actions">
+      <a href="{{ url_for('admin.project_form') }}" class="admin-btn admin-btn--ghost"><i class="fa-solid fa-plus"></i> New project</a>
+      <a href="{{ url_for('admin.service_form') }}" class="admin-btn admin-btn--ghost"><i class="fa-solid fa-briefcase"></i> Add service</a>
+      <a href="{{ url_for('admin.blog_form') }}" class="admin-btn admin-btn--ghost"><i class="fa-solid fa-pen-to-square"></i> Write article</a>
+      <a href="{{ url_for('admin.footer_links') }}" class="admin-btn admin-btn--ghost"><i class="fa-solid fa-link"></i> Manage footer</a>
+      <a href="{{ url_for('admin.gallery_form') }}" class="admin-btn admin-btn--ghost"><i class="fa-solid fa-upload"></i> Upload photo</a>
+      <a href="{{ url_for('admin.profile_edit') }}" class="admin-btn admin-btn--ghost"><i class="fa-solid fa-pen"></i> Edit site text</a>
+      <a href="{{ url_for('admin.contacts_list') }}" class="admin-btn admin-btn--ghost"><i class="fa-solid fa-envelope"></i> View messages</a>
+    </div>
+  </section>
+
+  <section class="admin-card">
+    <h2>Recent messages</h2>
+    {% if recent_contacts %}
+    <ul class="admin-list">
+      {% for c in recent_contacts %}
+      <li>
+        <strong>{{ c.name }}</strong> — {{ c.email }}<br />
+        <small>{{ c.message[:80] }}{% if c.message|length > 80 %}…{% endif %}</small>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="admin-muted">No messages yet.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Portfolio | ENGSAQAWE{% endblock %}
+
+{% block content %}
+<section class="page-header fade-in">
+    <h1 class="page-title">Featured <span class="text-teal">Projects</span></h1>
+    <p class="page-subtitle">A showcase of systems and web applications.</p>
+</section>
+
+<section class="portfolio-section fade-in">
+    <div class="portfolio-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="Web Apps">Web Apps</button>
+        <button class="filter-btn" data-filter="Systems">Systems</button>
+        <button class="filter-btn" data-filter="Tools">Tools</button>
+    </div>
+
+    <div class="portfolio-grid" id="portfolioGrid">
+        {% if projects %}
+            {% for project in projects %}
+            <div class="project-card" data-category="{{ project.category }}">
+                <div class="project-content">
+                    <div class="project-header">
+                        <h3 class="project-title">{{ project.title }}</h3>
+                        <span class="project-category">{{ project.category }}</span>
+                    </div>
+                    <p class="project-desc">{{ project.description }}</p>
+                    <div class="project-tech">
+                        {% for tech in project.tech_stack.split(',') %}
+                        <span class="tech-tag">{{ tech.strip() }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="project-links">
+                        {% if project.live_link %}
+                        <a href="{{ project.live_link }}" target="_blank" class="btn-small">Live Demo</a>
+                        {% endif %}
+                        {% if project.source_link %}
+                        <a href="{{ project.source_link }}" target="_blank" class="btn-small-outline">Source Code</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i data-lucide="layout-grid" class="empty-icon"></i>
+                <p>No projects to display yet. Add projects to the database to see them here.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

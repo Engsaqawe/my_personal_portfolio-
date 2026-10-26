@@ -1,0 +1,17 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if item else 'Upload' }} Photo{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div><h1>{{ 'Edit' if item else 'Upload' }} Photo</h1></div>
+  <a href="{{ url_for('admin.gallery_list') }}" class="admin-btn admin-btn--ghost">← Back</a>
+</header>
+<form class="admin-card admin-form" method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <label>Label<input type="text" name="label" value="{{ item.label if item else '' }}" placeholder="Portrait, headshot…" /></label>
+  <label>Sort order<input type="number" name="sort_order" value="{{ item.sort_order if item else 0 }}" /></label>
+  <label class="admin-check"><input type="checkbox" name="is_hero" {% if item and item.is_hero %}checked{% endif %} /> Use as hero photo on homepage</label>
+  <label>Image file<input type="file" name="image" accept="image/*" {% if not item %}required{% endif %} /></label>
+  {% if item %}<div class="admin-preview"><img src="{{ url_for('static', filename=item.image_url) }}" alt="" /></div>{% endif %}
+  <button type="submit" class="admin-btn admin-btn--primary">Save photo</button>
+</form>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "admin/base.html" %}
+{% block title %}Site Settings{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div>
+    <h1>Site Settings</h1>
+    <p>Edit almost every public text — hero, sections, contact, footer, SEO. Profile name/socials stay under Profile & Text.</p>
+  </div>
+</header>
+
+<form class="admin-card admin-form admin-settings" method="POST">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  {% for group_id, group_label, fields in groups %}
+  <details class="admin-settings__group" {% if loop.first %}open{% endif %}>
+    <summary>{{ group_label }}</summary>
+    <div class="admin-settings__body">
+      {% for field in fields %}
+      <label class="admin-form__full">
+        {{ field.label }}
+        {% if field.type == 'textarea' %}
+        <textarea name="{{ field.key }}" rows="4">{{ settings.get(field.key, field.default) }}</textarea>
+        {% elif field.type == 'number' %}
+        <input type="number" name="{{ field.key }}" value="{{ settings.get(field.key, field.default) }}" />
+        {% else %}
+        <input type="text" name="{{ field.key }}" value="{{ settings.get(field.key, field.default) }}" />
+        {% endif %}
+      </label>
+      {% endfor %}
+    </div>
+  </details>
+  {% endfor %}
+
+  <button type="submit" class="admin-btn admin-btn--primary" style="margin-top:1rem">Save all settings</button>
+</form>
+{% endblock %}

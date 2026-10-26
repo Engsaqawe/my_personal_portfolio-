@@ -1,0 +1,12 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if post else 'New' }} article{% endblock %}
+{% block content %}
+<header class="admin-header"><div><h1>{{ 'Edit' if post else 'New' }} article</h1><p>Drafts stay private until you publish.</p></div><a href="{{ url_for('admin.blog_list') }}" class="admin-btn admin-btn--ghost">← Back</a></header>
+<form class="admin-card admin-form" method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <div class="admin-form__grid"><label>Title<input name="title" required maxlength="200" value="{{ post.title if post else '' }}"></label><label>URL slug<input name="slug" maxlength="220" value="{{ post.slug if post else '' }}" placeholder="generated-from-title"></label><label>Category<input name="category" value="{{ post.category if post else 'Technology' }}"></label><label>Tags<input name="tags" value="{{ post.tags if post else '' }}" placeholder="AI, web, product"></label><label>Author<input name="author" value="{{ post.author if post else 'ENGSAQAWE' }}"></label><label>Status<select name="status"><option value="draft" {% if not post or post.status == 'draft' %}selected{% endif %}>Draft</option><option value="published" {% if post and post.status == 'published' %}selected{% endif %}>Published</option></select></label></div>
+  <label>Short summary<textarea name="excerpt" maxlength="500" rows="3">{{ post.excerpt if post else '' }}</textarea></label><label>Article content<textarea name="body" required rows="16" placeholder="Write your article here. Blank lines create paragraph breaks.">{{ post.body if post else '' }}</textarea></label><label>Cover image<input type="file" name="cover_image" accept="image/png,image/jpeg,image/webp,image/gif">{% if post and post.cover_image %}<span>Current: {{ post.cover_image }}</span>{% endif %}</label>
+  <details><summary>Search and sharing</summary><div class="admin-form__grid"><label>SEO title<input name="seo_title" maxlength="200" value="{{ post.seo_title if post else '' }}"></label><label>SEO description<textarea name="seo_description" maxlength="320" rows="3">{{ post.seo_description if post else '' }}</textarea></label></div></details>
+  <button class="admin-btn admin-btn--primary" type="submit">Save article</button>
+</form>
+{% endblock %}

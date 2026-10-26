@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>{% block title %}Academy{% endblock %} · ENGSAQAWE Academy</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/academy.css') }}" />
+</head>
+<body class="acad-body{% if session.admin_id %} acad-body--app{% endif %}">
+  {% if session.admin_id %}
+  <div class="acad-overlay" id="acadOverlay" aria-hidden="true"></div>
+
+  <header class="acad-topbar">
+    <button type="button" class="acad-menu-btn" id="acadMenuBtn" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+    <span class="acad-topbar__title">ENGSAQAWE Academy</span>
+    <a href="{{ url_for('home') }}" class="acad-topbar__link" aria-label="Main site"><i class="fa-solid fa-house"></i></a>
+  </header>
+
+  <aside class="acad-sidebar" id="acadSidebar">
+    <div class="acad-sidebar__head">
+      <a href="{{ url_for('academy.dashboard') }}" class="acad-brand">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <span>Academy Studio</span>
+      </a>
+      <button type="button" class="acad-sidebar__close" id="acadMenuClose" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="acad-sidebar__identity"><span class="acad-sidebar__avatar"><i class="fa-solid fa-graduation-cap"></i></span><span><strong>Course management</strong><small>Admin workspace</small></span></div>
+    <nav class="acad-nav">
+      <small class="acad-nav__label">OVERVIEW</small>
+      <a href="{{ url_for('academy.dashboard') }}" class="{% if request.endpoint == 'academy.dashboard' %}is-active{% endif %}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <small class="acad-nav__label">LEARNING</small>
+      <a href="{{ url_for('academy.courses_list') }}" class="{% if 'course' in (request.endpoint or '') and 'category' not in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-book-open"></i><span>Courses</span></a>
+      <a href="{{ url_for('academy.categories_list') }}" class="{% if 'categor' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-layer-group"></i><span>Categories</span></a>
+      <a href="{{ url_for('academy.lessons_hub') }}" class="{% if 'lesson' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-circle-play"></i><span>Lessons</span></a>
+      <a href="{{ url_for('academy.students_list') }}" class="{% if 'student' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-users"></i><span>Students</span></a>
+      <a href="{{ url_for('academy.enrollments_list') }}" class="{% if 'enrollment' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-user-check"></i><span>Enrollments</span></a>
+      <small class="acad-nav__label">FINANCE · DEMO</small>
+      <a href="{{ url_for('academy.payments_list') }}" class="{% if 'payment' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-receipt"></i><span>Payments</span><em>Demo</em></a>
+    </nav>
+    <div class="acad-sidebar__foot">
+      <a href="{{ url_for('academy.index') }}"><i class="fa-solid fa-arrow-up-right-from-square"></i><span>Open public Academy</span></a>
+      <a href="{{ url_for('admin.dashboard') }}"><i class="fa-solid fa-shield-halved"></i><span>Main admin</span></a>
+      <form method="POST" action="{{ url_for('academy.logout') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button type="submit" class="acad-nav__logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></form>
+    </div>
+  </aside>
+  {% endif %}
+
+  <div class="acad-main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="acad-flashes">
+      {% for category, message in messages %}
+      <div class="acad-flash acad-flash--{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+
+  {% if session.admin_id %}
+  <script>
+    (function () {
+      var btn = document.getElementById("acadMenuBtn");
+      var close = document.getElementById("acadMenuClose");
+      var overlay = document.getElementById("acadOverlay");
+      function open() { document.body.classList.add("acad-menu-open"); }
+      function shut() { document.body.classList.remove("acad-menu-open"); }
+      if (btn) btn.addEventListener("click", open);
+      if (close) close.addEventListener("click", shut);
+      if (overlay) overlay.addEventListener("click", shut);
+    })();
+  </script>
+  {% endif %}
+</body>
+</html>

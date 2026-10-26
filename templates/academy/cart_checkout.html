@@ -1,0 +1,22 @@
+{% extends "academy/base.html" %}
+{% block title %}Checkout · ENGSAQAWE Academy{% endblock %}
+{% block content %}
+<main class="academy-public academy-checkout-page">
+  <header class="academy-public__nav">
+    <a class="academy-public__brand" href="{{ url_for('academy.index') }}"><i class="fa-solid fa-graduation-cap"></i> ENGSAQAWE Academy</a>
+    <nav><button type="button" class="academy-theme-toggle" data-academy-theme aria-label="Toggle light and dark theme"><i class="fa-solid fa-moon"></i></button><a href="{{ url_for('academy.cart') }}">Back to cart</a></nav>
+  </header>
+  <section class="academy-checkout">
+    <div class="academy-checkout__heading"><p class="academy-kicker">STEP 2 OF 3 · REVIEW YOUR ORDER</p><h1>Checkout</h1><p>Confirm the courses for this student account before completing the demo enrollment.</p></div>
+    <div class="academy-checkout__grid">
+      <div class="academy-checkout__main">
+        <section class="academy-checkout-panel"><div class="academy-checkout-panel__title"><span>1</span><div><h2>Student account</h2><p>Course access will be added to this account.</p></div></div><div class="academy-checkout-account"><i class="fa-solid fa-circle-user"></i><span><strong>{{ student.name }}</strong><small>{{ student.email }}</small></span></div></section>
+        <section class="academy-checkout-panel"><div class="academy-checkout-panel__title"><span>2</span><div><h2>Courses</h2><p>{{ items|length }} course{{ '' if items|length == 1 else 's' }} in this order</p></div></div><div class="academy-checkout-lines">{% for item in items %}<article class="academy-checkout-line">{% if item.thumbnail_url %}<img src="{{ item.thumbnail_url }}" alt="Cover for {{ item.title }}">{% else %}<span class="academy-checkout-line__icon"><i class="fa-solid {{ item.icon or 'fa-book-open' }}"></i></span>{% endif %}<span class="academy-checkout-line__title"><strong>{{ item.title }}</strong><small>{{ item.lesson_count }} lessons · {{ item.level or 'Beginner' }}</small></span><strong class="academy-checkout-line__price">{{ item.currency }} {{ '%.2f'|format(item.price|float) if item.price|float > 0 else 'Free' }}</strong></article>{% endfor %}</div></section>
+        <section class="academy-checkout-panel"><div class="academy-checkout-panel__title"><span>3</span><div><h2>Payment</h2><p>Demo mode is active for this Academy.</p></div></div><div class="academy-demo-notice"><i class="fa-solid fa-shield-halved"></i><span><strong>No real payment will be taken.</strong><br>This checkout records a demo transaction and unlocks course access. It does not ask for or store card details.</span></div></section>
+      </div>
+      <aside class="academy-enroll-card academy-checkout-summary"><h2>Order summary</h2><p>Review the amount for each currency before continuing.</p>{% for code,total in totals.items() %}<div class="academy-checkout-total"><span>{{ code }} total</span><strong>{{ '%.2f'|format(total) }}</strong></div>{% endfor %}<p class="academy-checkout-summary__note"><i class="fa-solid fa-infinity"></i> Lifetime access · Learn at your own pace</p><form method="post" action="{{ url_for('academy.cart_checkout') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="academy-cta academy-cta--full">Confirm demo enrollment <i class="fa-solid fa-arrow-right"></i></button></form><small class="academy-demo-caption">Demo checkout · No charge</small></aside>
+    </div>
+  </section>
+</main>
+<script src="{{ url_for('static', filename='js/academy.js') }}" defer></script>
+{% endblock %}

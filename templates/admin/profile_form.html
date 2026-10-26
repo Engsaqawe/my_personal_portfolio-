@@ -1,0 +1,44 @@
+{% extends "admin/base.html" %}
+{% block title %}Profile & Text{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div><h1>Profile & Site Text</h1><p>Edit name, hero text, mission, and social links.</p></div>
+</header>
+
+<form class="admin-card admin-form" method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <div class="admin-form__grid">
+    <label>Full name<input type="text" name="full_name" value="{{ profile.full_name if profile else '' }}" required /></label>
+    <label>Brand name<input type="text" name="brand_name" value="{{ profile.brand_name if profile else '' }}" required /></label>
+    <label>Tagline<input type="text" name="tagline" value="{{ profile.tagline if profile else '' }}" /></label>
+    <label>Email<input type="email" name="email" value="{{ profile.email if profile else '' }}" /></label>
+    <label>WhatsApp (numbers only, +252 added on site)<input type="text" name="whatsapp" value="{{ profile.whatsapp if profile else '684421687' }}" placeholder="684421687" /></label>
+    <label>Location<input type="text" name="location_note" value="{{ profile.location_note if profile else '' }}" /></label>
+  </div>
+
+  <h3>Hero section</h3>
+  <div class="admin-form__grid">
+    <label class="admin-form__full">Hero title<input type="text" name="hero_title" value="{{ profile.hero_title if profile else '' }}" /></label>
+    <label class="admin-form__full">Hero subtitle<textarea name="hero_subtitle" rows="2">{{ profile.hero_subtitle if profile else '' }}</textarea></label>
+    <label>Hero photo upload<input type="file" name="hero_image" accept="image/*" /></label>
+    {% if profile and profile.hero_image %}
+    <div class="admin-preview"><img src="{{ url_for('static', filename=profile.hero_image) }}" alt="Hero" /></div>
+    {% endif %}
+  </div>
+
+  <h3>About</h3>
+  <label>Mission<textarea name="mission" rows="3">{{ profile.mission if profile else '' }}</textarea></label>
+  <label>Vision<textarea name="vision" rows="3">{{ profile.vision if profile else '' }}</textarea></label>
+
+  <h3>Social links</h3>
+  <div class="admin-form__grid">
+    <label>GitHub<input type="url" name="github_url" value="{{ profile.github_url if profile else '' }}" /></label>
+    <label>LinkedIn<input type="url" name="linkedin_url" value="{{ profile.linkedin_url if profile else '' }}" /></label>
+    <label>Facebook<input type="url" name="facebook_url" value="{{ profile.facebook_url if profile else '' }}" /></label>
+    <label>YouTube<input type="url" name="youtube_url" value="{{ profile.youtube_url if profile else '' }}" /></label>
+    <label>Twitter / X<input type="url" name="twitter_url" value="{{ profile.twitter_url if profile else '' }}" /></label>
+  </div>
+
+  <button type="submit" class="admin-btn admin-btn--primary">Save profile</button>
+</form>
+{% endblock %}

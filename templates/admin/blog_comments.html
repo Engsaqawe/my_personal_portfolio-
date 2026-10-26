@@ -1,0 +1,11 @@
+{% extends "admin/base.html" %}
+{% block title %}Blog comments{% endblock %}
+{% block content %}
+<header class="admin-header"><div><h1>Blog comments</h1><p>Review comments before they appear on published articles.</p></div><a href="{{ url_for('admin.blog_list') }}" class="admin-btn admin-btn--ghost">← Articles</a></header>
+<section class="admin-card admin-table-wrap"><table class="admin-table"><thead><tr><th>Comment</th><th>Article</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>
+{% for item in comments %}<tr><td data-label="Comment"><strong>{{ item.name }}</strong><p>{{ item.body }}</p></td><td data-label="Article"><a href="{{ url_for('blog_post', slug=item.post_slug) }}" target="_blank" rel="noopener">{{ item.post_title }}</a></td><td data-label="Status">{{ item.status|title }}</td><td data-label="Date">{{ item.created_at }}</td><td data-label="Actions" class="admin-table__actions">{% if item.status != 'approved' %}<form method="POST" action="{{ url_for('admin.blog_comment_action', item_id=item.id, action='approve') }}">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="admin-btn admin-btn--sm admin-btn--primary">Approve</button></form>{% endif %}<form method="POST" action="{{ url_for('admin.blog_comment_action', item_id=item.id, action='delete') }}" onsubmit="return confirm('Delete this comment?')">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="admin-btn admin-btn--sm admin-btn--danger">Delete</button></form></td></tr>
+{% else %}<tr><td colspan="5" class="admin-muted">No comments yet.</td></tr>{% endfor %}
+</tbody></table></section>
+{% endblock %}

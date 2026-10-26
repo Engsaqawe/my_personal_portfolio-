@@ -1,0 +1,9 @@
+{% extends "admin/base.html" %}
+{% block title %}Blog{% endblock %}
+{% block content %}
+<header class="admin-header"><div><h1>Blog articles</h1><p>Write, save drafts, and publish technology articles.</p></div><a href="{{ url_for('admin.blog_form') }}" class="admin-btn admin-btn--primary"><i class="fa-solid fa-plus"></i> New article</a></header>
+<div class="admin-card admin-table-wrap"><table class="admin-table admin-table--responsive"><thead><tr><th>Title</th><th>Status</th><th>Category</th><th>Updated</th><th>Actions</th></tr></thead><tbody>
+{% for post in posts %}<tr><td data-label="Title"><strong>{{ post.title }}</strong><br><small>/blog/{{ post.slug }}</small></td><td data-label="Status">{{ post.status|title }}</td><td data-label="Category">{{ post.category or '—' }}</td><td data-label="Updated">{{ post.updated_at }}</td><td data-label="Actions" class="admin-table__actions"><a href="{{ url_for('admin.blog_form', item_id=post.id) }}" class="admin-btn admin-btn--sm">Edit</a>{% if post.status == 'published' %}<a href="{{ url_for('blog_post', slug=post.slug) }}" class="admin-btn admin-btn--sm" target="_blank">View</a>{% endif %}<form method="POST" action="{{ url_for('admin.blog_delete', item_id=post.id) }}" onsubmit="return confirm('Delete this article?')">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="admin-btn admin-btn--sm admin-btn--danger">Delete</button></form></td></tr>{% else %}<tr><td colspan="5" class="admin-muted">No articles yet.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

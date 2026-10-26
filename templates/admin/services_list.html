@@ -1,0 +1,33 @@
+{% extends "admin/base.html" %}
+{% block title %}Services{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div><h1>Services</h1><p>Manage the cards displayed in the Services section.</p></div>
+  <a href="{{ url_for('admin.service_form') }}" class="admin-btn admin-btn--primary"><i class="fa-solid fa-plus"></i> Add service</a>
+</header>
+
+<div class="admin-card admin-table-wrap">
+  <table class="admin-table admin-table--responsive">
+    <thead><tr><th>Service</th><th>Visual</th><th>Order</th><th>Visible</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for service in services %}
+      <tr>
+        <td data-label="Service"><strong>{{ service.title }}</strong><br><small class="admin-muted">{{ service.slug }}</small></td>
+        <td data-label="Visual"><i class="{{ service.icon_class }}" style="color:{{ service.accent_color }}"></i> {{ service.art_type }}</td>
+        <td data-label="Order">{{ service.sort_order }}</td>
+        <td data-label="Visible">{{ 'Yes' if service.is_active else 'No' }}</td>
+        <td data-label="Actions" class="admin-table__actions">
+          <a href="{{ url_for('admin.service_form', item_id=service.id) }}" class="admin-btn admin-btn--sm">Edit</a>
+          <form method="POST" action="{{ url_for('admin.service_delete', item_id=service.id) }}" onsubmit="return confirm('Delete this service?')">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="admin-btn admin-btn--sm admin-btn--danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="admin-muted">No services yet. Add one to display the Services section.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

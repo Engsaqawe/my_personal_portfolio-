@@ -1,0 +1,35 @@
+{% extends "academy/base.html" %}
+{% block title %}Students{% endblock %}
+{% block content %}
+<header class="acad-header">
+  <div><h1>Students</h1><p>Manage student accounts, access, and course activity.</p></div>
+  <a href="{{ url_for('academy.student_form') }}" class="acad-btn acad-btn--primary"><i class="fa-solid fa-user-plus"></i> Add student</a>
+</header>
+<form class="acad-filterbar" method="get"><label class="acad-search"><i class="fa-solid fa-magnifying-glass"></i><input type="search" name="q" value="{{ search }}" placeholder="Search name or email"></label><select name="status"><option value="all" {% if status == 'all' %}selected{% endif %}>All accounts</option><option value="active" {% if status == 'active' %}selected{% endif %}>Active</option><option value="paused" {% if status == 'paused' %}selected{% endif %}>Deactivated</option></select><button class="acad-btn acad-btn--primary">Filter</button></form>
+<div class="acad-card acad-table-wrap">
+  <table class="acad-table">
+    <thead><tr><th>Name</th><th>Email</th><th>Enrollments</th><th>Account</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for s in students %}
+      <tr>
+        <td><a class="acad-inline-link" href="{{ url_for('academy.student_detail', item_id=s.id) }}">{{ s.name }}</a></td>
+        <td>{{ s.email }}</td>
+        <td>{{ s.enrollment_count }}</td>
+        <td><span class="acad-badge acad-badge--{{ s.status }}">{{ s.status }}</span></td>
+        <td class="acad-table__actions">
+          <a href="{{ url_for('academy.student_detail', item_id=s.id) }}" class="acad-btn acad-btn--sm">View</a>
+          <a href="{{ url_for('academy.student_form', item_id=s.id) }}" class="acad-btn acad-btn--sm">Edit</a>
+          <form method="POST" action="{{ url_for('academy.student_toggle_status', item_id=s.id) }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="next" value="{{ request.full_path }}"><button type="submit" class="acad-btn acad-btn--sm">{{ 'Deactivate' if s.status == 'active' else 'Activate' }}</button></form>
+          <form method="POST" action="{{ url_for('academy.student_delete', item_id=s.id) }}" onsubmit="return confirm('Remove student?')">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="acad-btn acad-btn--sm acad-btn--danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="acad-muted">No students yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

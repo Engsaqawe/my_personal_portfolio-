@@ -1,0 +1,31 @@
+{% extends "admin/base.html" %}
+{% block title %}Academy Courses{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div><h1>Academy Courses</h1></div>
+  <a href="{{ url_for('admin.course_form') }}" class="admin-btn admin-btn--primary"><i class="fa-solid fa-plus"></i> Add course</a>
+</header>
+<div class="admin-card admin-table-wrap">
+  <table class="admin-table admin-table--responsive">
+    <thead><tr><th>Title</th><th>Modules</th><th>Progress</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for c in courses %}
+      <tr>
+        <td data-label="Title">{{ c.title }}</td>
+        <td data-label="Modules">{{ c.modules }}</td>
+        <td data-label="Progress">{{ c.progress }}%</td>
+        <td data-label="Actions" class="admin-table__actions">
+          <a href="{{ url_for('admin.course_form', item_id=c.id) }}" class="admin-btn admin-btn--sm">Edit</a>
+          <form method="POST" action="{{ url_for('admin.course_delete', item_id=c.id) }}" onsubmit="return confirm('Delete?')">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="admin-btn admin-btn--sm admin-btn--danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr class="admin-table__empty"><td colspan="4" class="admin-muted">No courses yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

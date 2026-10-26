@@ -1,0 +1,27 @@
+{% extends "academy/base.html" %}
+{% block title %}{{ 'Edit' if student else 'Add' }} Student{% endblock %}
+{% block content %}
+<header class="acad-header">
+  <div><h1>{{ 'Edit' if student else 'Add' }} Student</h1></div>
+  <a href="{{ url_for('academy.students_list') }}" class="acad-btn acad-btn--ghost">← Back</a>
+</header>
+<form class="acad-card acad-form" method="POST">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <div class="acad-form__row">
+    <label>Name<input type="text" name="name" value="{{ student.name if student else '' }}" required /></label>
+    <label>Email<input type="email" name="email" value="{{ student.email if student else '' }}" required /></label>
+  </div>
+  <div class="acad-form__row">
+    <label>Status
+      <select name="status">
+        {% for st in ['active', 'paused'] %}
+        <option value="{{ st }}" {% if student and student.status == st %}selected{% endif %}>{{ st }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </div>
+  <label>Notes<textarea name="notes" rows="3">{{ student.notes if student else '' }}</textarea></label>
+  <label>{% if student %}New password (leave blank to keep current){% else %}Password{% endif %}<input type="password" name="password" minlength="10" {% if not student %}required{% endif %} autocomplete="new-password"><small>Use at least 10 characters.</small></label>
+  <button type="submit" class="acad-btn acad-btn--primary">Save student</button>
+</form>
+{% endblock %}

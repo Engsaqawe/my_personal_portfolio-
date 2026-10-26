@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+{% block title %}Affiliate Links{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div><h1>Affiliate links</h1><p>Manage the thumbnail, description, button destination, visibility, and display order for each recommendation.</p></div>
+</header>
+
+<form class="admin-card admin-form" method="POST">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <h2>Add an affiliate link</h2>
+  <div class="admin-form__grid">
+    <label>Link name<input name="label" required placeholder="Namecheap Hosting"></label>
+    <label>Destination URL<input name="url" type="url" required placeholder="https://example.com/your-partner-link"></label>
+    <label>Thumbnail URL<input name="image_url" type="text" placeholder="https://example.com/logo-or-product-image.jpg"><small>Optional. Use an HTTPS image URL or a file under /static/.</small></label>
+    <label class="admin-form__full">Card description<textarea name="description" rows="2" maxlength="500" placeholder="A short, accurate description of this product or service."></textarea><small>Optional; the shared fallback description is used when blank.</small></label>
+    <label>Display order<input name="sort_order" type="number" value="0"></label>
+    <label class="admin-check"><input name="is_active" type="checkbox" checked> Show on website</label>
+  </div>
+  <button class="admin-btn admin-btn--primary" type="submit"><i class="fa-solid fa-plus"></i> Add link</button>
+</form>
+
+<div class="admin-card admin-table-wrap">
+  <table class="admin-table admin-table--responsive">
+    <thead><tr><th>Name</th><th>Thumbnail</th><th>Description</th><th>URL</th><th>Visible</th><th>Order</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for item in links %}
+      <tr>
+        <td data-label="Name"><strong>{{ item.label }}</strong></td>
+        <td data-label="Thumbnail">{% if item.image_url %}<img src="{{ item.image_url }}" alt="{{ item.label }} thumbnail" width="56" height="56" loading="lazy" style="object-fit:cover;border-radius:10px">{% else %}<span class="admin-muted">None</span>{% endif %}</td>
+        <td data-label="Description">{{ item.description or 'Uses shared fallback' }}</td>
+        <td data-label="URL">{{ item.url }}</td>
+        <td data-label="Visible">{{ 'Yes' if item.is_active else 'No' }}</td>
+        <td data-label="Order">{{ item.sort_order }}</td>
+        <td data-label="Actions" class="admin-table__actions">
+          <a class="admin-btn admin-btn--sm" href="{{ url_for('admin.affiliate_edit', item_id=item.id) }}">Edit</a>
+          <form method="POST" action="{{ url_for('admin.affiliate_delete', item_id=item.id) }}" onsubmit="return confirm('Delete this affiliate link?')">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <button class="admin-btn admin-btn--sm admin-btn--danger" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="admin-muted">No affiliate links yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

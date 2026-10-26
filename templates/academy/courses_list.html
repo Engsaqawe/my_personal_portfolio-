@@ -1,0 +1,35 @@
+{% extends "academy/base.html" %}
+{% block title %}Courses{% endblock %}
+{% block content %}
+<header class="acad-header">
+  <div><h1>Courses</h1><p>Manage academy curriculum</p></div>
+  <a href="{{ url_for('academy.course_form') }}" class="acad-btn acad-btn--primary"><i class="fa-solid fa-plus"></i> Add course</a>
+</header>
+<form class="acad-filterbar" method="get"><label class="acad-search"><i class="fa-solid fa-magnifying-glass"></i><input type="search" name="q" value="{{ search }}" placeholder="Search courses"></label><select name="status"><option value="all" {% if status == 'all' %}selected{% endif %}>All statuses</option><option value="published" {% if status == 'published' %}selected{% endif %}>Published</option><option value="draft" {% if status == 'draft' %}selected{% endif %}>Draft</option></select><select name="category"><option value="">All categories</option>{% for category in categories %}<option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>{{ category.name }}</option>{% endfor %}</select><button class="acad-btn acad-btn--primary">Search</button></form>
+<div class="acad-card acad-table-wrap">
+  <table class="acad-table">
+    <thead><tr><th>Title</th><th>Category</th><th>Lessons</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for c in courses %}
+      <tr>
+        <td><i class="fa-solid {{ c.icon }}"></i> {{ c.title }}</td>
+        <td>{{ c.category_name or 'Uncategorized' }}</td>
+        <td>{{ c.lesson_count }}</td>
+        <td>{{ c.currency }} {{ '%.2f'|format(c.price|float) }}</td>
+        <td><span class="acad-badge acad-badge--{{ 'active' if c.status == 'published' else 'paused' }}">{{ c.status }}</span></td>
+        <td class="acad-table__actions">
+          <a href="{{ url_for('academy.lessons_list', course_id=c.id) }}" class="acad-btn acad-btn--sm">Lessons</a>
+          <a href="{{ url_for('academy.course_form', item_id=c.id) }}" class="acad-btn acad-btn--sm">Edit</a>
+          <form method="POST" action="{{ url_for('academy.course_delete', item_id=c.id) }}" onsubmit="return confirm('Delete course?')">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="acad-btn acad-btn--sm acad-btn--danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="acad-muted">No matching courses. Create your first course above.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

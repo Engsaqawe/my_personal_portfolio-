@@ -1,0 +1,317 @@
+"""ENGSAQAWE — Flask + MySQL portfolio with admin panel."""
+
+import os
+import secrets
+from datetime import timedelta
+from hmac import compare_digest
+from flask import Flask, render_template, request, flash, redirect, url_for, abort, Response, jsonify, session
+from xml.sax.saxutils import escape
+from db_helpers import query_all, query_one, execute
+from seed_mysql import seed
+from utils import tech_meta, demo_link, TECH_ICONS, cert_preview_href, cert_download_href
+from site_settings import (
+    get_site_settings,
+    parse_pipe_lines,
+    parse_filters,
+    split_title,
+)
+from admin_routes import admin_bp
+from academy_routes import academy_bp
+
+app = Flask(__name__)
+APP_ENV = os.getenv("APP_ENV", "development").strip().lower()
+SECRET_KEY = os.getenv("SECRET_KEY")
+try:
+    ACADEMY_MAX_VIDEO_MB = max(16, min(1024, int(os.getenv("ACADEMY_MAX_VIDEO_MB", "256"))))
+except ValueError:
+    ACADEMY_MAX_VIDEO_MB = 256
+if APP_ENV == "production" and not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY must be set in production.")
+app.secret_key = SECRET_KEY or secrets.token_hex(32)
+app.config.update(
+    MAX_CONTENT_LENGTH=(ACADEMY_MAX_VIDEO_MB + 2) * 1024 * 1024,
+    ACADEMY_MAX_VIDEO_MB=ACADEMY_MAX_VIDEO_MB,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=(APP_ENV == "production"),
+    SESSION_COOKIE_SAMESITE="Lax",
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
+)
+
+
+@app.before_request
+def limit_request_size():
+    """Keep ordinary forms small while allowing bounded Academy video uploads."""
+    content_length = request.content_length
+    if not content_length:
+        return None
+    if request.endpoint == "academy.lesson_form" and request.method == "POST":
+        max_bytes = (ACADEMY_MAX_VIDEO_MB + 2) * 1024 * 1024
+    elif request.endpoint == "academy.course_form" and request.method == "POST":
+        max_bytes = 10 * 1024 * 1024
+    else:
+        max_bytes = 8 * 1024 * 1024
+    if content_length > max_bytes:
+        abort(413, description=f"This upload exceeds the {max_bytes // (1024 * 1024)} MB limit.")
+    return None
+
+
+def csrf_token():
+    if "csrf_token" not in session:
+        session["csrf_token"] = secrets.token_urlsafe(32)
+    return session["csrf_token"]
+
+
+@app.context_processor
+def expose_csrf_token():
+    return {"csrf_token": csrf_token}
+
+
+@app.before_request
+def enforce_csrf():
+    if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
+        return None
+    submitted = request.form.get("_csrf_token", "") or request.headers.get("X-CSRFToken", "")
+    valid_tokens = (session.get("csrf_token", ""), session.get("blog_csrf_token", ""))
+    if not any(token and compare_digest(submitted, token) for token in valid_tokens):
+        abort(400, description="The form expired. Reload the page and try again.")
+    return None
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    return response
+
+app.jinja_env.globals.update(
+    tech_meta=tech_meta,
+    demo_link=demo_link,
+    cert_preview_href=cert_preview_href,
+    cert_download_href=cert_download_href,
+    tech_icons=TECH_ICONS,
+    split_title=split_title,
+)
+
+app.register_blueprint(admin_bp)
+app.register_blueprint(academy_bp)
+
+# Keep newly added CMS tables available on deployed WSGI servers as well as local runs.
+try:
+    seed()
+except Exception as exc:
+    app.logger.warning("Database initialization deferred: %s", exc)
+
+
+def get_gallery():
+    rows = query_all("SELECT * FROM gallery ORDER BY sort_order ASC, id ASC")
+    if rows:
+        return rows
+    return [
+        {"image_url": "images/pictures/me.png", "label": "Portrait", "is_hero": 1},
+        {"image_url": "images/pictures/me2.png", "label": "Portrait 2", "is_hero": 0},
+    ]
+
+
+def get_hero_image(profile, gallery):
+    if profile and profile.get("hero_image"):
+        return profile["hero_image"]
+    for item in gallery:
+        if item.get("is_hero"):
+            return item["image_url"]
+    return gallery[0]["image_url"] if gallery else "images/pictures/me.png"
+
+
+@app.route("/", methods=["GET", "POST"])
+def home():
+    if request.method == "POST":
+        name = (request.form.get("name") or "").strip()
+        email = (request.form.get("email") or "").strip()
+        project_type = (request.form.get("projectType") or "").strip()
+        message = (request.form.get("message") or "").strip()
+
+        if not name or not email or not message:
+            flash("Please fill in all required fields.", "error")
+        elif len(message) > 250:
+            flash("Messages must be 250 characters or fewer.", "error")
+        else:
+            execute(
+                """INSERT INTO contacts (name, email, project_type, message)
+                   VALUES (%s, %s, %s, %s)""",
+                (name, email, project_type or None, message),
+            )
+            flash("Message saved. I will get back to you soon.", "success")
+            return redirect(url_for("home") + "#contact")
+
+    profile = query_one("SELECT * FROM profile WHERE id = 1")
+    projects = query_all("SELECT * FROM projects WHERE featured = 1 ORDER BY sort_order ASC, id ASC")
+    services = query_all("SELECT * FROM services WHERE is_active = 1 ORDER BY sort_order ASC, id ASC")
+    footer_projects = query_all("SELECT title, live_link FROM projects ORDER BY sort_order ASC, id ASC LIMIT 5")
+    certificates = query_all("SELECT * FROM certificates ORDER BY sort_order ASC, id ASC")
+    courses = query_all(
+        """SELECT c.*, (SELECT COUNT(*) FROM academy_lessons l WHERE l.course_id=c.id) AS lesson_count
+           FROM courses c WHERE c.status='published' ORDER BY c.sort_order ASC, c.id ASC"""
+    )
+    blog_posts = query_all("SELECT id, title, slug, excerpt, cover_image, category, author, published_at FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC, id DESC LIMIT 3")
+    footer_links = query_all("SELECT * FROM footer_links WHERE is_active = 1 ORDER BY section_order ASC, sort_order ASC, id ASC")
+    affiliate_links = [
+        item for item in footer_links
+        if (item.get("section_title") or "").strip().casefold() == "affiliate links"
+    ]
+    footer_link_groups = {}
+    for item in footer_links:
+        if (item.get("section_title") or "").strip().casefold() == "affiliate links":
+            continue
+        footer_link_groups.setdefault(item["section_title"], []).append(item)
+    gallery = get_gallery()
+    hero_image = get_hero_image(profile, gallery)
+    settings = get_site_settings()
+
+    skills_cards = [
+        {"icon": icon or "fa-code", "title": title, "text": text}
+        for icon, title, text in parse_pipe_lines(settings.get("skills_cards", ""), 3)
+    ]
+    timeline_items = [
+        {"title": title, "meta": meta, "body": body}
+        for title, meta, body in parse_pipe_lines(settings.get("timeline_items", ""), 3)
+    ]
+    portfolio_filters = parse_filters(settings.get("portfolio_filters", ""))
+    tech_list = [t.strip() for t in (settings.get("tech_list") or "").split(",") if t.strip()]
+    project_type_options = [
+        line.strip()
+        for line in (settings.get("project_type_options") or "").splitlines()
+        if line.strip()
+    ]
+    service_titles = [service["title"] for service in services]
+    service_title_set = set(service_titles)
+    project_type_options = service_titles + [option for option in project_type_options if option not in service_title_set]
+    typewriter_phrases = [
+        line.strip()
+        for line in (settings.get("typewriter_phrases") or "").splitlines()
+        if line.strip()
+    ]
+
+    return render_template(
+        "index.html",
+        profile=profile,
+        projects=projects,
+        services=services,
+        affiliate_links=affiliate_links,
+        footer_projects=footer_projects,
+        certificates=certificates,
+        courses=courses,
+        blog_posts=blog_posts,
+        footer_links=footer_links,
+        footer_link_groups=footer_link_groups.items(),
+        gallery=gallery,
+        hero_image=hero_image,
+        settings=settings,
+        skills_cards=skills_cards,
+        timeline_items=timeline_items,
+        portfolio_filters=portfolio_filters,
+        tech_list=tech_list,
+        project_type_options=project_type_options,
+        typewriter_phrases=typewriter_phrases,
+        tech_meta=tech_meta,
+        demo_link=demo_link,
+        cert_preview_href=cert_preview_href,
+        cert_download_href=cert_download_href,
+        tech_icons=TECH_ICONS,
+    )
+
+
+@app.route("/blog")
+def blog_index():
+    posts = query_all("SELECT * FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC, id DESC")
+    settings = get_site_settings()
+    return render_template("blog/index.html", posts=posts, settings=settings)
+
+
+def blog_visitor_key():
+    """Return a stable, anonymous browser key for article views and reactions."""
+    if not session.get("blog_visitor_key"):
+        session["blog_visitor_key"] = secrets.token_hex(32)
+    return session["blog_visitor_key"]
+
+
+@app.route("/blog/<slug>", methods=["GET", "POST"])
+def blog_post(slug):
+    post = query_one("SELECT * FROM blog_posts WHERE slug = %s AND status = 'published'", (slug,))
+    if not post:
+        abort(404)
+    if not session.get("blog_csrf_token"):
+        session["blog_csrf_token"] = secrets.token_urlsafe(32)
+    if request.method == "POST":
+        submitted_token = request.form.get("csrf_token", "")
+        if not secrets.compare_digest(submitted_token, session.get("blog_csrf_token", "")):
+            abort(400)
+        name = (request.form.get("name") or "").strip()
+        body = (request.form.get("comment") or "").strip()
+        if not 2 <= len(name) <= 80 or not 3 <= len(body) <= 1200:
+            flash("Enter a name (2–80 characters) and comment (3–1200 characters).", "error")
+        else:
+            execute("INSERT INTO blog_comments (post_id, name, body, status) VALUES (%s, %s, %s, 'pending')",
+                    (post["id"], name, body))
+            flash("Thanks! Your comment is awaiting review.", "success")
+        return redirect(url_for("blog_post", slug=slug) + "#comments")
+
+    visitor_key = blog_visitor_key()
+    execute("INSERT IGNORE INTO blog_post_views (post_id, visitor_key) VALUES (%s, %s)", (post["id"], visitor_key))
+    views = query_one("SELECT COUNT(*) AS total FROM blog_post_views WHERE post_id = %s", (post["id"],))["total"]
+    reaction_rows = query_all("SELECT reaction, COUNT(*) AS total FROM blog_post_reactions WHERE post_id = %s GROUP BY reaction", (post["id"],))
+    reactions = {row["reaction"]: row["total"] for row in reaction_rows}
+    my_reaction = query_one("SELECT reaction FROM blog_post_reactions WHERE post_id = %s AND visitor_key = %s", (post["id"], visitor_key))
+    comments = query_all("SELECT name, body, created_at FROM blog_comments WHERE post_id = %s AND status = 'approved' ORDER BY created_at DESC", (post["id"],))
+    settings = get_site_settings()
+    return render_template("blog/post.html", post=post, settings=settings, views=views,
+                           reactions=reactions, my_reaction=my_reaction["reaction"] if my_reaction else "",
+                           comments=comments)
+
+
+@app.route("/blog/<slug>/react", methods=["POST"])
+def blog_react(slug):
+    post = query_one("SELECT id FROM blog_posts WHERE slug = %s AND status = 'published'", (slug,))
+    if not post:
+        abort(404)
+    reaction = (request.get_json(silent=True) or {}).get("reaction", "")
+    csrf_token = request.headers.get("X-CSRFToken", "")
+    if not secrets.compare_digest(csrf_token, session.get("blog_csrf_token", "")):
+        return jsonify(error="Refresh the page and try again."), 400
+    if reaction not in {"like", "dislike"}:
+        return jsonify(error="Choose like or dislike."), 400
+    visitor_key = blog_visitor_key()
+    execute("""INSERT INTO blog_post_reactions (post_id, visitor_key, reaction) VALUES (%s, %s, %s)
+        ON DUPLICATE KEY UPDATE reaction=VALUES(reaction)""", (post["id"], visitor_key, reaction))
+    rows = query_all("SELECT reaction, COUNT(*) AS total FROM blog_post_reactions WHERE post_id = %s GROUP BY reaction", (post["id"],))
+    counts = {row["reaction"]: row["total"] for row in rows}
+    return jsonify(likes=counts.get("like", 0), dislikes=counts.get("dislike", 0), reaction=reaction)
+
+
+@app.route("/robots.txt")
+def robots():
+    from flask import send_from_directory
+    return send_from_directory(app.root_path, "robots.txt")
+
+
+@app.route("/sitemap.xml")
+def sitemap():
+    base = (get_site_settings().get("site_url") or "https://engsaqawe.com").rstrip("/")
+    posts = query_all("SELECT slug, updated_at FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC")
+    urls = [f"{base}/", f"{base}/blog"]
+    for post in posts:
+        lastmod = post.get("updated_at")
+        if hasattr(lastmod, "strftime"):
+            lastmod = lastmod.strftime("%Y-%m-%d")
+        urls.append((f"{base}/blog/{post['slug']}", lastmod or ""))
+    entries = []
+    for item in urls:
+        loc, lastmod = item if isinstance(item, tuple) else (item, "")
+        lastmod_xml = f"<lastmod>{escape(str(lastmod))}</lastmod>" if lastmod else ""
+        entries.append(f"<url><loc>{escape(loc)}</loc>{lastmod_xml}</url>")
+    xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + "".join(entries) + "</urlset>"
+    return Response(xml, mimetype="application/xml; charset=utf-8")
+
+
+if __name__ == "__main__":
+    app.run(debug=(APP_ENV != "production"), host="127.0.0.1", port=5000)

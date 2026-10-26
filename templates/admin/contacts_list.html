@@ -1,0 +1,31 @@
+{% extends "admin/base.html" %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div><h1>Contact Messages</h1><p>Messages from the contact form.</p></div>
+</header>
+<div class="admin-card admin-table-wrap">
+  <table class="admin-table admin-table--responsive">
+    <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Message</th><th>Date</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for c in contacts %}
+      <tr>
+        <td data-label="Name">{{ c.name }}</td>
+        <td data-label="Email"><a href="mailto:{{ c.email }}">{{ c.email }}</a></td>
+        <td data-label="Type">{{ c.project_type or '—' }}</td>
+        <td data-label="Message">{{ c.message[:100] }}{% if c.message|length > 100 %}…{% endif %}</td>
+        <td data-label="Date"><small>{{ c.created_at }}</small></td>
+        <td data-label="Actions">
+          <form method="POST" action="{{ url_for('admin.contact_delete', item_id=c.id) }}" onsubmit="return confirm('Delete message?')">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="admin-btn admin-btn--sm admin-btn--danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr class="admin-table__empty"><td colspan="6" class="admin-muted">No messages yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

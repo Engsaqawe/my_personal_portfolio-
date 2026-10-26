@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>{% block title %}Admin{% endblock %} · ENGSAQAWE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+</head>
+<body class="admin-body{% if session.admin_id %} admin-body--app{% endif %}">
+  {% if session.admin_id %}
+  <div class="admin-overlay" id="adminOverlay" aria-hidden="true"></div>
+
+  <header class="admin-topbar">
+    <button type="button" class="admin-menu-btn" id="adminMenuBtn" aria-label="Open menu" aria-expanded="false">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <span class="admin-topbar__title">ENGSAQAWE Admin</span>
+    <a href="{{ url_for('home') }}" class="admin-topbar__link" target="_blank" aria-label="View site">
+      <i class="fa-solid fa-arrow-up-right-from-square"></i>
+    </a>
+  </header>
+
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="admin-sidebar__head">
+      <a href="{{ url_for('admin.dashboard') }}" class="admin-brand">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>ENGSAQAWE Admin</span>
+      </a>
+      <button type="button" class="admin-sidebar__close" id="adminMenuClose" aria-label="Close menu">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <nav class="admin-nav">
+      <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}is-active{% endif %}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="{{ url_for('admin.profile_edit') }}" class="{% if request.endpoint == 'admin.profile_edit' %}is-active{% endif %}"><i class="fa-solid fa-user"></i> Profile & Text</a>
+      <a href="{{ url_for('admin.site_settings') }}" class="{% if request.endpoint == 'admin.site_settings' %}is-active{% endif %}"><i class="fa-solid fa-sliders"></i> Site Settings</a>
+      <a href="{{ url_for('admin.projects_list') }}" class="{% if 'project' in request.endpoint %}is-active{% endif %}"><i class="fa-solid fa-folder-open"></i> Projects</a>
+      <a href="{{ url_for('admin.services_list') }}" class="{% if 'service' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-briefcase"></i> Services</a>
+      <a href="{{ url_for('admin.affiliates_list') }}" class="{% if 'affiliate' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-handshake"></i> Affiliate Links</a>
+      <a href="{{ url_for('admin.blog_list') }}" class="{% if 'blog' in request.endpoint %}is-active{% endif %}"><i class="fa-solid fa-newspaper"></i> Blog</a>
+      <a href="{{ url_for('admin.blog_comments') }}" class="{% if request.endpoint == 'admin.blog_comments' %}is-active{% endif %}"><i class="fa-solid fa-comments"></i> Blog Comments</a>
+      <a href="{{ url_for('admin.footer_links') }}" class="{% if 'footer_link' in request.endpoint %}is-active{% endif %}"><i class="fa-solid fa-link"></i> Footer Links</a>
+      <a href="{{ url_for('admin.gallery_list') }}" class="{% if 'gallery' in request.endpoint %}is-active{% endif %}"><i class="fa-solid fa-images"></i> Photos</a>
+      <a href="{{ url_for('admin.certificates_list') }}" class="{% if 'certificate' in request.endpoint %}is-active{% endif %}"><i class="fa-solid fa-certificate"></i> Certificates</a>
+      <a href="{{ url_for('admin.courses_list') }}" class="{% if 'course' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-graduation-cap"></i> Courses</a>
+      <a href="{{ url_for('admin.contacts_list') }}" class="{% if 'contact' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-envelope"></i> Messages</a>
+    </nav>
+    <div class="admin-sidebar__foot">
+      <a href="{{ url_for('academy.dashboard') }}"><i class="fa-solid fa-chalkboard-user"></i> Academy Panel</a>
+      <a href="{{ url_for('home') }}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> View site</a>
+      <form method="POST" action="{{ url_for('admin.logout') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button type="submit" class="admin-nav__logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></form>
+    </div>
+  </aside>
+  {% endif %}
+
+  <div class="admin-main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="admin-flashes">
+      {% for category, message in messages %}
+      <div class="admin-flash admin-flash--{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+
+  {% if session.admin_id %}
+  <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
+  {% endif %}
+</body>
+</html>

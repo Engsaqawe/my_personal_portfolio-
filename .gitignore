@@ -1,12 +1,67 @@
+# Environment variables and secrets
+
 .env
 .env.*
 !.env.example
-__pycache__/
+.envrc
+
+# Python
+
+**pycache**/
 *.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+
 .venv/
 venv/
+env/
+ENV/
+
+# Flask
+
+instance/
+.webassets-cache
+
+# Database files
+
 database.db
 *.sqlite
 *.sqlite3
+db.sqlite3
+db.sqlite3-journal
+
+# Uploaded/private media
+
 instance/academy_videos/
 static/uploads/academy/
+
+# Build and distribution
+
+build/
+dist/
+downloads/
+*.egg-info/
+.eggs/
+wheels/
+
+# IDE and editor
+
+.vscode/
+.idea/
+
+# Logs and temporary files
+
+*.log
+tempCodeRunnerFile.py
+
+# Secrets
+
+.streamlit/secrets.toml
+.pypirc

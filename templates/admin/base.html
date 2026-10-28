@@ -45,6 +45,8 @@
       <a href="{{ url_for('admin.certificates_list') }}" class="{% if 'certificate' in request.endpoint %}is-active{% endif %}"><i class="fa-solid fa-certificate"></i> Certificates</a>
       <a href="{{ url_for('admin.courses_list') }}" class="{% if 'course' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-graduation-cap"></i> Courses</a>
       <a href="{{ url_for('admin.contacts_list') }}" class="{% if 'contact' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-envelope"></i> Messages</a>
+      <a href="{{ url_for('admin.chats_list') }}" class="{% if 'chat' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-comments"></i> Visitor Chats</a>
+      <a href="{{ url_for('admin.research_list') }}" class="{% if 'research' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-book-open"></i> Research</a>
     </nav>
     <div class="admin-sidebar__foot">
       <a href="{{ url_for('academy.dashboard') }}"><i class="fa-solid fa-chalkboard-user"></i> Academy Panel</a>

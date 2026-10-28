@@ -14,6 +14,51 @@ CREATE TABLE IF NOT EXISTS contacts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS site_users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    email VARCHAR(180) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS site_chats (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'open',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY site_chat_user (user_id),
+    INDEX site_chat_updated (updated_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS site_chat_messages (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    chat_id INT NOT NULL,
+    sender_type VARCHAR(10) NOT NULL,
+    sender_id INT DEFAULT NULL,
+    body TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX site_chat_message_order (chat_id, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS research_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(240) NOT NULL,
+    authors VARCHAR(500) DEFAULT NULL,
+    publication VARCHAR(240) DEFAULT NULL,
+    publication_type VARCHAR(80) DEFAULT 'Journal article',
+    published_on DATE DEFAULT NULL,
+    abstract TEXT,
+    url VARCHAR(1000) DEFAULT NULL,
+    doi VARCHAR(255) DEFAULT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    is_published TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX research_publication_order (is_published, sort_order, published_on)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS projects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(160) NOT NULL,
@@ -347,7 +392,7 @@ PROFILE = (
     "To build software that feels inevitable — interfaces and systems so considered they get out of the way and let teams do their best work.",
     "A world where ambitious ideas are not constrained by tooling. ENGSAQAWE turns complex requirements into precise, calm, scalable digital products.",
     "Remote-friendly · Available worldwide",
-    "hello@engsaqawe.com",
+    "nuurc9399@gmail.com",
     "684421687",
     "https://github.com",
     "https://www.linkedin.com",
@@ -471,6 +516,10 @@ def seed():
                     VALUES (1,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
                     PROFILE,
                 )
+
+            # Update only the previous public default; preserve a custom email set by the owner.
+            cur.execute("UPDATE profile SET email=%s WHERE id=1 AND email=%s", ("nuurc9399@gmail.com", "hello@engsaqawe.com"))
+            cur.execute("UPDATE site_settings SET setting_value='' WHERE setting_key='contact_hint' AND setting_value=%s", ("Your message is saved to the database.",))
 
             cur.execute("SELECT COUNT(*) AS c FROM admins")
             if cur.fetchone()["c"] == 0:

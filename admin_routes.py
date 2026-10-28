@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from auth import admin_required, login_admin, get_admin_by_id
 from db_helpers import query_all, query_one, execute, execute_returning_id
+from database import get_db
 from uploads import save_upload
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -528,6 +529,116 @@ def contact_delete(item_id):
     execute("DELETE FROM contacts WHERE id = %s", (item_id,))
     flash("Message deleted.", "success")
     return redirect(url_for("admin.contacts_list"))
+
+
+# ---------- Research publications ----------
+def safe_research_url(value):
+    value = (value or "").strip()
+    if not value:
+        return None
+    parsed = urlparse(value)
+    if parsed.scheme == "https" and parsed.netloc and not parsed.username and not parsed.password and "\\" not in value:
+        return value
+    return None
+
+
+@admin_bp.route("/research")
+@admin_required
+def research_list():
+    items = query_all("SELECT * FROM research_items ORDER BY sort_order ASC, published_on DESC, id DESC")
+    return render_template("admin/research_list.html", items=items)
+
+
+@admin_bp.route("/research/new", methods=["GET", "POST"])
+@admin_bp.route("/research/<int:item_id>/edit", methods=["GET", "POST"])
+@admin_required
+def research_form(item_id=None):
+    item = query_one("SELECT * FROM research_items WHERE id=%s", (item_id,)) if item_id else None
+    if request.method == "POST":
+        title = (request.form.get("title") or "").strip()
+        authors = (request.form.get("authors") or "").strip()
+        publication = (request.form.get("publication") or "").strip()
+        pub_type = (request.form.get("publication_type") or "Journal article").strip()
+        published_on = (request.form.get("published_on") or "").strip() or None
+        abstract = (request.form.get("abstract") or "").strip()
+        url_value = (request.form.get("url") or "").strip()
+        doi = (request.form.get("doi") or "").strip()
+        try:
+            rank = int(request.form.get("sort_order") or 0)
+        except ValueError:
+            rank = -1
+        if not title or len(title) > 240 or len(authors) > 500 or len(publication) > 240 or len(pub_type) > 80 or len(doi) > 255 or len(abstract) > 5000 or rank < 0:
+            flash("Check the title, field lengths, and display order.", "error")
+            return render_template("admin/research_form.html", item=item)
+        elif published_on:
+            try:
+                datetime.strptime(published_on, "%Y-%m-%d")
+            except ValueError:
+                flash("Enter the publication date in YYYY-MM-DD format.", "error")
+                return render_template("admin/research_form.html", item=item)
+        url = safe_research_url(url_value) if url_value else None
+        if url_value and not url:
+            flash("Publication links must use a valid HTTPS address.", "error")
+        else:
+            payload = (title, authors or None, publication or None, pub_type or "Journal article", published_on, abstract or None, url, doi or None, rank, 1 if request.form.get("is_published") else 0)
+            if item:
+                execute("""UPDATE research_items SET title=%s,authors=%s,publication=%s,publication_type=%s,
+                    published_on=%s,abstract=%s,url=%s,doi=%s,sort_order=%s,is_published=%s WHERE id=%s""", (*payload,item_id))
+                flash("Research entry updated.", "success")
+            else:
+                execute("""INSERT INTO research_items (title,authors,publication,publication_type,published_on,abstract,url,doi,sort_order,is_published)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""", payload)
+                flash("Research entry added.", "success")
+            return redirect(url_for("admin.research_list"))
+    return render_template("admin/research_form.html", item=item)
+
+
+@admin_bp.route("/research/<int:item_id>/delete", methods=["POST"])
+@admin_required
+def research_delete(item_id):
+    execute("DELETE FROM research_items WHERE id=%s", (item_id,))
+    flash("Research entry deleted.", "success")
+    return redirect(url_for("admin.research_list"))
+
+
+# ---------- Visitor chats ----------
+@admin_bp.route("/chats")
+@admin_required
+def chats_list():
+    items = query_all("""SELECT c.id,c.status,c.updated_at,u.name,u.email,
+        (SELECT m.body FROM site_chat_messages m WHERE m.chat_id=c.id ORDER BY m.id DESC LIMIT 1) AS last_message,
+        (SELECT COUNT(*) FROM site_chat_messages m WHERE m.chat_id=c.id AND m.sender_type='user') AS visitor_messages
+        FROM site_chats c JOIN site_users u ON u.id=c.user_id ORDER BY c.updated_at DESC""")
+    return render_template("admin/chats_list.html", chats=items)
+
+
+@admin_bp.route("/chats/<int:chat_id>", methods=["GET", "POST"])
+@admin_required
+def chat_detail(chat_id):
+    chat = query_one("SELECT c.*,u.name,u.email FROM site_chats c JOIN site_users u ON u.id=c.user_id WHERE c.id=%s", (chat_id,))
+    if not chat:
+        flash("Chat not found.", "error")
+        return redirect(url_for("admin.chats_list"))
+    if request.method == "POST":
+        body = (request.form.get("message") or "").strip()
+        if not body or len(body) > 2000:
+            flash("Reply must be between 1 and 2,000 characters.", "error")
+        else:
+            conn = get_db()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("INSERT INTO site_chat_messages (chat_id,sender_type,sender_id,body) VALUES (%s,'admin',%s,%s)", (chat_id,session.get("admin_id"),body))
+                    cur.execute("UPDATE site_chats SET status='open',updated_at=CURRENT_TIMESTAMP WHERE id=%s", (chat_id,))
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+            finally:
+                conn.close()
+            flash("Reply sent.", "success")
+            return redirect(url_for("admin.chat_detail", chat_id=chat_id))
+    messages = query_all("SELECT * FROM site_chat_messages WHERE chat_id=%s ORDER BY id ASC", (chat_id,))
+    return render_template("admin/chat_detail.html", chat=chat, messages=messages)
 
 
 # ---------- Blog ----------

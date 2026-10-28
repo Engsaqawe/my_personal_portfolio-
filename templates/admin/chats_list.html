@@ -1,0 +1,9 @@
+{% extends "admin/base.html" %}
+{% block title %}Chats{% endblock %}
+{% block content %}
+<header class="admin-header"><div><h1>Visitor Chats</h1><p>Reply to conversations started by registered visitors.</p></div></header>
+<div class="admin-card admin-table-wrap"><table class="admin-table admin-table--responsive"><thead><tr><th>Visitor</th><th>Latest message</th><th>Updated</th><th>Action</th></tr></thead><tbody>
+{% for chat in chats %}<tr><td data-label="Visitor"><strong>{{ chat.name }}</strong><br><a href="mailto:{{ chat.email }}">{{ chat.email }}</a></td><td data-label="Latest message">{{ chat.last_message or '' }}</td><td data-label="Updated">{{ chat.updated_at }}</td><td data-label="Action"><a class="admin-btn admin-btn--sm" href="{{ url_for('admin.chat_detail', chat_id=chat.id) }}">Open conversation</a></td></tr>
+{% else %}<tr><td colspan="4" class="admin-muted">No visitor chats yet.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

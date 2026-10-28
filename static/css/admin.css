@@ -1,4 +1,14 @@
 /* ENGSAQAWE Admin Panel — Fully Responsive */
+.admin-chat-thread { display:grid; gap:1rem; max-width:900px; margin-bottom:1rem; }
+.admin-chat-message { max-width:min(760px,90%); padding:.9rem 1rem; border:1px solid var(--admin-border); border-radius:14px; background:var(--admin-card); overflow-wrap:anywhere; }
+.admin-chat-message--admin { justify-self:end; border-color:var(--admin-primary); }
+.admin-chat-message header { display:flex; justify-content:space-between; gap:1rem; color:var(--admin-muted); font-size:.78rem; }
+.admin-chat-message p { margin:.6rem 0 0; white-space:pre-wrap; line-height:1.6; }
+.admin-chat-reply { display:grid; gap:.8rem; max-width:900px; }
+.admin-chat-reply label { font-weight:700; }.admin-chat-reply textarea { width:100%; padding:.8rem; border:1px solid var(--admin-border); border-radius:10px; color:inherit; background:var(--admin-bg); font:inherit; resize:vertical; }
+.admin-form__row { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:0 1rem; }
+.admin-form__row .admin-checkbox { display:flex; align-items:center; gap:.6rem; }
+.admin-form__row .admin-checkbox input { width:auto; }
 :root {
   --admin-bg: #0a101f;
   --admin-panel: #111827;

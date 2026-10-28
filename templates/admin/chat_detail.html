@@ -1,0 +1,9 @@
+{% extends "admin/base.html" %}
+{% block title %}Chat with {{ chat.name }}{% endblock %}
+{% block content %}
+<header class="admin-header"><div><h1>Chat with {{ chat.name }}</h1><p><a href="mailto:{{ chat.email }}">{{ chat.email }}</a></p></div><a class="admin-btn" href="{{ url_for('admin.chats_list') }}">← All chats</a></header>
+<section class="admin-card admin-chat-thread" aria-label="Conversation">
+{% for message in messages %}<article class="admin-chat-message admin-chat-message--{{ message.sender_type }}"><header><strong>{{ 'You' if message.sender_type == 'admin' else chat.name }}</strong><time>{{ message.created_at }}</time></header><p>{{ message.body }}</p></article>{% else %}<p class="admin-muted">No messages yet.</p>{% endfor %}
+</section>
+<form class="admin-card admin-chat-reply" method="post"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><label for="replyBody">Reply to {{ chat.name }}</label><textarea id="replyBody" name="message" maxlength="2000" rows="4" required></textarea><button class="admin-btn admin-btn--primary">Send reply</button></form>
+{% endblock %}

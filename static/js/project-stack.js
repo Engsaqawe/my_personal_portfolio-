@@ -5,12 +5,10 @@
   if (!section) return;
 
   const cards = [...section.querySelectorAll("[data-stack-card]")];
-  const slots = [...section.querySelectorAll("[data-stack-slot]")];
   const progressBar = document.getElementById("stackProgress");
   const counter = document.getElementById("stackCounterNumber");
   const dots = [...section.querySelectorAll(".stack-counter__dots i")];
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const desktop = window.matchMedia("(min-width: 900px)");
   let frame = 0;
   let activeIndex = 0;
 
@@ -40,24 +38,12 @@
       heroTitle.style.removeProperty("opacity");
     }
 
-    if (!reducedMotion.matches && desktop.matches) {
-      slots.forEach((slot, index) => {
-        const next = slots[index + 1];
-        const card = slot.querySelector("[data-stack-card]");
-        if (!next || !card) return;
-        const top = next.getBoundingClientRect().top;
-        const progress = clamp((viewport * 0.92 - top) / (viewport * 0.8), 0, 1);
-        card.style.setProperty("--stack-progress", String(progress));
-        card.style.transform = `scale(${1 - progress * 0.1}) rotateX(${progress * 5}deg)`;
-        card.style.filter = `brightness(${1 - progress * 0.62})`;
-      });
-    } else {
-      cards.forEach((card) => {
-        card.style.removeProperty("--stack-progress");
-        card.style.removeProperty("transform");
-        card.style.removeProperty("filter");
-      });
-    }
+    // Cards use normal document flow to keep long pages and touch scrolling stable.
+    cards.forEach((card) => {
+      card.style.removeProperty("--stack-progress");
+      card.style.removeProperty("transform");
+      card.style.removeProperty("filter");
+    });
 
     const candidates = cards.map((card, index) => {
       if (card.closest(".stack-slot")?.hidden) return null;
@@ -110,7 +96,6 @@
   window.addEventListener("load", refreshLayout, { once: true });
   document.addEventListener("portfolio:filter", scheduleUpdate);
   reducedMotion.addEventListener?.("change", scheduleUpdate);
-  desktop.addEventListener?.("change", scheduleUpdate);
   document.fonts?.ready.then(refreshLayout).catch(() => {});
   scheduleUpdate();
 })();

@@ -19,6 +19,18 @@ def admin_required(view):
     return wrapped
 
 
+def site_user_required(view):
+    """Require a registered portfolio account for contact and chat actions."""
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if not session.get("site_user_id"):
+            flash("Sign in or create an account before sending a message.", "error")
+            return redirect(url_for("account_login", next=request.full_path.rstrip("?") or "/#contact"))
+        return view(*args, **kwargs)
+
+    return wrapped
+
+
 def login_admin(username, password):
     admin = query_one("SELECT * FROM admins WHERE username = %s AND is_active = 1", (username,))
     if not admin or not check_password_hash(admin["password_hash"], password):

@@ -1,0 +1,9 @@
+{% extends "admin/base.html" %}
+{% block title %}Research{% endblock %}
+{% block content %}
+<header class="admin-header"><div><h1>Research & Publications</h1><p>Manage the journals and papers shown in the portfolio Research section.</p></div><a class="admin-btn admin-btn--primary" href="{{ url_for('admin.research_form') }}">Add publication</a></header>
+<div class="admin-card admin-table-wrap"><table class="admin-table admin-table--responsive"><thead><tr><th>Title</th><th>Publication</th><th>Type</th><th>Date</th><th>Visibility</th><th>Actions</th></tr></thead><tbody>
+{% for item in items %}<tr><td data-label="Title"><strong>{{ item.title }}</strong><br><small>{{ item.authors or 'Author not listed' }}</small></td><td data-label="Publication">{{ item.publication or '—' }}</td><td data-label="Type">{{ item.publication_type }}</td><td data-label="Date">{{ item.published_on or '—' }}</td><td data-label="Visibility">{{ 'Published' if item.is_published else 'Hidden' }}</td><td data-label="Actions"><a class="admin-btn admin-btn--sm" href="{{ url_for('admin.research_form', item_id=item.id) }}">Edit</a> <form method="post" action="{{ url_for('admin.research_delete', item_id=item.id) }}" style="display:inline" onsubmit="return confirm('Delete this publication?')"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="admin-btn admin-btn--sm admin-btn--danger">Delete</button></form></td></tr>
+{% else %}<tr><td colspan="6" class="admin-muted">No publications yet. Add your first journal article or paper here.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

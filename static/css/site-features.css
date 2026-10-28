@@ -1,0 +1,41 @@
+.research-section { padding-top: clamp(3rem, 7vw, 6rem); }
+.research-section__header { margin-bottom: 2rem; }
+.research-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr)); gap:1rem; }
+.research-card { min-height:270px; display:flex; flex-direction:column; padding:clamp(1.2rem,2.3vw,1.8rem); border:1px solid var(--border); border-radius:var(--radius-lg); transition:transform .3s var(--ease),border-color .3s,box-shadow .3s; }
+.research-card:hover { transform:translateY(-5px); border-color:var(--border-strong); box-shadow:var(--shadow); }
+.research-card__top { display:flex; justify-content:space-between; align-items:center; gap:.7rem; color:var(--muted); font-size:.76rem; }
+.research-card__type { padding:.35rem .65rem; border-radius:999px; color:var(--primary); background:color-mix(in srgb,var(--primary) 12%,transparent); font-weight:800; }
+.research-card h3 { margin:1rem 0 .55rem; font:800 clamp(1.25rem,2vw,1.65rem)/1.25 var(--font-display); }
+.research-card__authors,.research-card__publication,.research-card__abstract,.research-card__doi { color:var(--muted); font-size:.9rem; line-height:1.65; }
+.research-card__authors { margin:.2rem 0; }.research-card__publication { margin:.15rem 0; font-weight:700; }.research-card__abstract { margin:.7rem 0; }
+.research-card__doi { margin:auto 0 .7rem; font-size:.78rem; overflow-wrap:anywhere; }
+.research-card__link { display:inline-flex; align-items:center; gap:.5rem; align-self:flex-start; margin-top:auto; color:var(--primary); font-weight:800; text-decoration:none; }
+.research-card__link:hover { color:var(--accent); }
+.research-empty { display:flex; align-items:center; gap:1rem; max-width:760px; padding:1.35rem; border:1px solid var(--border); border-radius:var(--radius-lg); }
+.research-empty>span { width:52px; height:52px; flex:0 0 52px; display:grid; place-items:center; border-radius:17px; color:var(--primary); background:color-mix(in srgb,var(--primary) 12%,transparent); font-size:1.25rem; }
+.research-empty h3,.research-empty p { margin:.2rem 0; }.research-empty p { color:var(--muted); }
+.academy-coming-soon { display:inline-flex; align-items:center; gap:.6rem; padding:.8rem 1.05rem; border:1px solid var(--border-strong); border-radius:999px; color:var(--primary); background:var(--glass); font-weight:800; }
+.contact-signin { padding:clamp(1.4rem,3vw,2.2rem); }.contact-signin h3 { margin:.5rem 0; font:800 1.6rem var(--font-display); }.contact-signin p:not(.eyebrow) { color:var(--muted); line-height:1.7; }.contact-signin>div { display:flex; flex-wrap:wrap; gap:.7rem; margin-top:1.2rem; }
+.site-chat { position:fixed; right:1.25rem; bottom:10.2rem; z-index:95; }
+.fab--chat { position:relative; right:auto; bottom:auto; color:#fff; background:linear-gradient(145deg,var(--primary),#0d4f2e); border:1px solid color-mix(in srgb,var(--accent) 60%,transparent); }
+.fab--chat:hover { transform:translateY(-3px) scale(1.04); }
+.site-chat__panel { position:absolute; right:0; bottom:4.25rem; width:min(390px,calc(100vw - 2rem)); max-height:min(620px,calc(100dvh - 9rem)); display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--border-strong); border-radius:22px; box-shadow:var(--shadow); opacity:0; visibility:hidden; transform:translateY(10px) scale(.98); transform-origin:bottom right; transition:opacity .2s,visibility .2s,transform .2s; }
+.site-chat[data-open="true"] .site-chat__panel { opacity:1; visibility:visible; transform:none; }
+.site-chat__head { display:flex; justify-content:space-between; align-items:center; padding:1rem 1rem .8rem; border-bottom:1px solid var(--border); background:var(--bg-elevated); }
+.site-chat__head .eyebrow,.site-chat__head h2 { margin:0; }.site-chat__head .eyebrow { font-size:.63rem; }.site-chat__head h2 { font:800 1.2rem var(--font-display); }
+.site-chat__head button { width:36px; height:36px; border:1px solid var(--border); border-radius:50%; color:var(--white); background:var(--glass); cursor:pointer; }
+.site-chat__welcome { display:flex; justify-content:space-between; align-items:center; gap:.5rem; padding:.65rem 1rem; margin:0; color:var(--muted); font-size:.78rem; border-bottom:1px solid var(--border); }
+.site-chat__signout { border:0; color:var(--primary); background:none; font:inherit; font-weight:800; cursor:pointer; }
+.site-chat__messages { min-height:100px; overflow:auto; display:flex; flex-direction:column; gap:.7rem; padding:1rem; }
+.site-chat__message { max-width:88%; padding:.65rem .8rem; border:1px solid var(--border); border-radius:14px; background:var(--glass); overflow-wrap:anywhere; }
+.site-chat__message--user { align-self:flex-end; border-color:var(--border-strong); background:color-mix(in srgb,var(--primary) 12%,var(--glass)); }
+.site-chat__message>span { color:var(--primary); font-size:.7rem; font-weight:800; }.site-chat__message p { margin:.3rem 0; white-space:pre-wrap; line-height:1.5; }.site-chat__message time { color:var(--muted-2); font-size:.68rem; }
+.site-chat__empty,.site-chat__guest { padding:1rem; color:var(--muted); }.site-chat__guest { display:grid; gap:.65rem; }.site-chat__guest .btn { justify-content:center; }
+.site-chat__form { display:flex; align-items:end; gap:.6rem; padding:.8rem; border-top:1px solid var(--border); background:var(--bg-elevated); }
+.site-chat__form textarea { flex:1; min-width:0; resize:vertical; max-height:130px; padding:.7rem; border:1px solid var(--border); border-radius:12px; color:var(--white); background:var(--glass); font:inherit; }
+.site-chat__form button { width:42px; height:42px; border:0; border-radius:12px; color:#fff; background:var(--primary); cursor:pointer; }
+.site-chat :focus-visible,.account-form :focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+.site-chat .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+@media(max-width:767px) { .site-chat { right:1rem; bottom:9.2rem; }.site-chat__panel { bottom:4rem; } }
+@media(max-width:420px) { .site-chat { right:.75rem; }.site-chat__panel { width:calc(100vw - 1.5rem); } }
+@media(prefers-reduced-motion:reduce) { .research-card,.site-chat__panel { transition:none; }.research-card:hover { transform:none; } }

@@ -1,0 +1,6 @@
+.account-page { min-height:100vh; display:grid; place-items:center; padding:1.25rem; color:var(--white); background:var(--bg); }
+.account-card { width:min(100%,480px); padding:clamp(1.4rem,5vw,2.6rem); border:1px solid var(--border); border-radius:var(--radius-lg); background:var(--bg-elevated); box-shadow:var(--shadow); }
+.account-brand { display:inline-flex; gap:.55rem; margin-bottom:2rem; color:var(--white); text-decoration:none; font-weight:900; }.account-brand span { color:var(--primary); }
+.account-card .eyebrow { color:var(--primary); font-weight:800; letter-spacing:.12em; font-size:.72rem; }.account-card h1 { margin:.45rem 0; font:800 clamp(1.8rem,6vw,2.35rem)/1.15 var(--font-display); }.account-intro,.account-switch,.account-back { color:var(--muted); line-height:1.6; }
+.account-form { display:grid; gap:1rem; margin:1.5rem 0 1rem; }.account-form label { display:grid; gap:.45rem; font-weight:700; }.account-form input { width:100%; min-height:48px; padding:.7rem .8rem; border:1px solid var(--border); border-radius:12px; color:var(--white); background:var(--glass); font:inherit; }.account-form small { color:var(--muted); font-weight:400; }.account-form button { justify-content:center; }
+.account-switch a,.account-back { color:var(--primary); font-weight:800; }.account-back { display:inline-block; margin-top:.7rem; text-decoration:none; }

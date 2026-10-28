@@ -4,9 +4,12 @@ import os
 import secrets
 from datetime import timedelta
 from hmac import compare_digest
+from urllib.parse import urlsplit
 from flask import Flask, render_template, request, flash, redirect, url_for, abort, Response, jsonify, session
 from xml.sax.saxutils import escape
-from db_helpers import query_all, query_one, execute
+from db_helpers import query_all, query_one, execute, execute_returning_id
+from database import get_db
+from werkzeug.security import check_password_hash, generate_password_hash
 from seed_mysql import seed
 from utils import tech_meta, demo_link, TECH_ICONS, cert_preview_href, cert_download_href
 from site_settings import (
@@ -126,21 +129,42 @@ def get_hero_image(profile, gallery):
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
-        name = (request.form.get("name") or "").strip()
-        email = (request.form.get("email") or "").strip()
+        user_id = session.get("site_user_id")
+        if not user_id:
+            flash("Please sign in or create an account before sending a message.", "error")
+            return redirect(url_for("account_login", next="/#contact"))
+        user = query_one("SELECT id, name, email FROM site_users WHERE id=%s AND is_active=1", (user_id,))
+        if not user:
+            session.pop("site_user_id", None)
+            session.pop("site_user_name", None)
+            session.pop("site_user_email", None)
+            return redirect(url_for("account_login", next="/#contact"))
+        name, email = user["name"], user["email"]
         project_type = (request.form.get("projectType") or "").strip()
         message = (request.form.get("message") or "").strip()
 
         if not name or not email or not message:
             flash("Please fill in all required fields.", "error")
+        elif len(project_type) > 80:
+            flash("Please choose a valid project type.", "error")
         elif len(message) > 250:
             flash("Messages must be 250 characters or fewer.", "error")
         else:
-            execute(
-                """INSERT INTO contacts (name, email, project_type, message)
-                   VALUES (%s, %s, %s, %s)""",
-                (name, email, project_type or None, message),
-            )
+            conn = get_db()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("INSERT INTO contacts (name, email, project_type, message) VALUES (%s,%s,%s,%s)",
+                                (name, email, project_type or None, message))
+                    cur.execute("INSERT INTO site_chats (user_id) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)", (user_id,))
+                    chat_id = cur.lastrowid
+                    cur.execute("INSERT INTO site_chat_messages (chat_id,sender_type,sender_id,body) VALUES (%s,'user',%s,%s)",
+                                (chat_id, user_id, message))
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+            finally:
+                conn.close()
             flash("Message saved. I will get back to you soon.", "success")
             return redirect(url_for("home") + "#contact")
 
@@ -154,6 +178,7 @@ def home():
            FROM courses c WHERE c.status='published' ORDER BY c.sort_order ASC, c.id ASC"""
     )
     blog_posts = query_all("SELECT id, title, slug, excerpt, cover_image, category, author, published_at FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC, id DESC LIMIT 3")
+    research_items = query_all("SELECT * FROM research_items WHERE is_published=1 ORDER BY sort_order ASC, published_on DESC, id DESC")
     footer_links = query_all("SELECT * FROM footer_links WHERE is_active = 1 ORDER BY section_order ASC, sort_order ASC, id ASC")
     affiliate_links = [
         item for item in footer_links
@@ -202,6 +227,10 @@ def home():
         certificates=certificates,
         courses=courses,
         blog_posts=blog_posts,
+        research_items=research_items,
+        site_user=session.get("site_user_id"),
+        site_chat_messages=(query_all("""SELECT m.sender_type,m.body,m.created_at FROM site_chat_messages m
+            JOIN site_chats c ON c.id=m.chat_id WHERE c.user_id=%s ORDER BY m.id ASC""", (session["site_user_id"],)) if session.get("site_user_id") else []),
         footer_links=footer_links,
         footer_link_groups=footer_link_groups.items(),
         gallery=gallery,
@@ -219,6 +248,102 @@ def home():
         cert_download_href=cert_download_href,
         tech_icons=TECH_ICONS,
     )
+
+
+def safe_local_next(value, fallback="/"):
+    value = (value or "").strip()
+    parsed = urlsplit(value)
+    return value if value.startswith("/") and not value.startswith("//") and not parsed.netloc else fallback
+
+
+@app.route("/account/register", methods=["GET", "POST"])
+def account_register():
+    next_url = safe_local_next(request.values.get("next"), "/#contact")
+    if request.method == "POST":
+        name = (request.form.get("name") or "").strip()
+        email = (request.form.get("email") or "").strip().lower()
+        password = request.form.get("password") or ""
+        email_shape_ok = email.count("@") == 1 and "." in email.rsplit("@", 1)[-1] and not any(char.isspace() for char in email)
+        if len(name) < 2 or len(name) > 120 or len(email) > 180 or not email_shape_ok or len(password) < 10 or len(password) > 256:
+            flash("Enter your name, a valid email, and a password with at least 10 characters.", "error")
+        elif query_one("SELECT id FROM site_users WHERE email=%s", (email,)):
+            flash("An account with that email already exists. Please sign in.", "error")
+            return redirect(url_for("account_login", next=next_url))
+        else:
+            try:
+                account_id = execute_returning_id(
+                    "INSERT INTO site_users (name,email,password_hash) VALUES (%s,%s,%s)",
+                    (name, email, generate_password_hash(password)),
+                )
+                session.clear()
+                session.permanent = True
+                session["site_user_id"], session["site_user_name"], session["site_user_email"] = account_id, name, email
+                return redirect(next_url)
+            except Exception:
+                flash("That account could not be created. Please try signing in or use another email.", "error")
+    return render_template("account_auth.html", mode="register", next_url=next_url)
+
+
+@app.route("/account/login", methods=["GET", "POST"])
+def account_login():
+    next_url = safe_local_next(request.values.get("next"), "/#contact")
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+        password = request.form.get("password") or ""
+        user = query_one("SELECT id,name,email,password_hash FROM site_users WHERE email=%s AND is_active=1", (email,))
+        if not user or not check_password_hash(user["password_hash"], password):
+            flash("Email or password is incorrect.", "error")
+        else:
+            session.clear()
+            session.permanent = True
+            session["site_user_id"], session["site_user_name"], session["site_user_email"] = user["id"], user["name"], user["email"]
+            return redirect(next_url)
+    return render_template("account_auth.html", mode="login", next_url=next_url)
+
+
+@app.route("/account/logout", methods=["POST"])
+def account_logout():
+    if not session.get("site_user_id"):
+        abort(403)
+    session.pop("site_user_id", None)
+    session.pop("site_user_name", None)
+    session.pop("site_user_email", None)
+    flash("You have signed out.", "success")
+    return redirect(url_for("home"))
+
+
+@app.route("/chat/send", methods=["POST"])
+def chat_send():
+    user_id = session.get("site_user_id")
+    if not user_id:
+        return redirect(url_for("account_login", next="/#chat-widget"))
+    message = (request.form.get("message") or "").strip()
+    if not message or len(message) > 2000:
+        flash("Chat messages must be between 1 and 2,000 characters.", "error")
+        return redirect(url_for("home") + "#chat-widget")
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO site_chats (user_id) VALUES (%s) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)", (user_id,))
+            chat_id = cur.lastrowid
+            cur.execute("INSERT INTO site_chat_messages (chat_id,sender_type,sender_id,body) VALUES (%s,'user',%s,%s)", (chat_id,user_id,message))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+    return redirect(url_for("home") + "#chat-widget")
+
+
+@app.route("/chat/messages")
+def chat_messages():
+    user_id = session.get("site_user_id")
+    if not user_id:
+        return jsonify({"error": "sign_in_required"}), 401
+    rows = query_all("""SELECT m.sender_type,m.body,m.created_at FROM site_chat_messages m
+        JOIN site_chats c ON c.id=m.chat_id WHERE c.user_id=%s ORDER BY m.id ASC""", (user_id,))
+    return jsonify([{"sender": row["sender_type"], "body": row["body"], "created_at": str(row["created_at"])} for row in rows])
 
 
 @app.route("/blog")

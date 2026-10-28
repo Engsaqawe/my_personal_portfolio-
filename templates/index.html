@@ -43,6 +43,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/services.css') }}?v=1" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/affiliates.css') }}?v=1" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/home-selective-design.css') }}?v=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/site-features.css') }}?v=1" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -135,6 +136,7 @@
         {% if services %}<a href="#services" class="nav__link">{{ settings.get('nav_services', 'Services') }}</a>{% endif %}
         <a href="#portfolio" class="nav__link">{{ settings.get('nav_portfolio', 'Portfolio') }}</a>
         {% if affiliate_links %}<a href="#affiliates" class="nav__link">{{ settings.get('nav_affiliates', 'Affiliates') }}</a>{% endif %}
+        <a href="#research" class="nav__link">{{ settings.get('nav_research', 'Research') }}</a>
         <a href="{{ url_for('blog_index') }}" class="nav__link">{{ settings.get('nav_blog', 'Blog') }}</a>
         <a href="{% if settings.get('academy_external_url') %}{{ settings.get('academy_external_url') }}{% else %}{{ url_for('academy.index') }}{% endif %}"
           class="nav__link nav__link--academy"
@@ -161,6 +163,7 @@
       {% if services %}<a href="#services" class="nav__mobile-link">{{ settings.get('nav_services', 'Services') }}</a>{% endif %}
       <a href="#portfolio" class="nav__mobile-link">{{ settings.get('nav_portfolio', 'Portfolio') }}</a>
       {% if affiliate_links %}<a href="#affiliates" class="nav__mobile-link">{{ settings.get('nav_affiliates', 'Affiliates') }}</a>{% endif %}
+      <a href="#research" class="nav__mobile-link">{{ settings.get('nav_research', 'Research') }}</a>
         <a href="{{ url_for('blog_index') }}" class="nav__mobile-link">{{ settings.get('nav_blog', 'Blog') }}</a>
       <a href="{% if settings.get('academy_external_url') %}{{ settings.get('academy_external_url') }}{% else %}{{ url_for('academy.index') }}{% endif %}"
         class="nav__mobile-link"
@@ -413,6 +416,34 @@
       {% endif %}
     </section>
 
+    <!-- RESEARCH & PUBLICATIONS -->
+    <section class="section research-section" id="research" aria-labelledby="research-title">
+      <div class="container">
+        <header class="section__header research-section__header">
+          <p class="eyebrow">Published work</p>
+          <h2 class="section__title" id="research-title">Research &amp; <span class="text-accent">Publications</span></h2>
+          <p class="section__subtitle">Journals, papers, and research contributions.</p>
+        </header>
+        {% if research_items %}
+        <div class="research-grid">
+          {% for item in research_items %}
+          <article class="research-card glass" data-reveal style="--i:{{ loop.index0 }}">
+            <div class="research-card__top"><span class="research-card__type">{{ item.publication_type or 'Publication' }}</span>{% if item.published_on %}<time datetime="{{ item.published_on.strftime('%Y-%m-%d') }}">{{ item.published_on.strftime('%b %Y') }}</time>{% endif %}</div>
+            <h3>{{ item.title }}</h3>
+            {% if item.authors %}<p class="research-card__authors">{{ item.authors }}</p>{% endif %}
+            {% if item.publication %}<p class="research-card__publication">{{ item.publication }}</p>{% endif %}
+            {% if item.abstract %}<p class="research-card__abstract">{{ item.abstract }}</p>{% endif %}
+            {% if item.doi %}<p class="research-card__doi">DOI: {{ item.doi }}</p>{% endif %}
+            {% if item.url %}<a class="research-card__link" href="{{ item.url }}" target="_blank" rel="noopener noreferrer">Read publication <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>{% endif %}
+          </article>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="research-empty glass"><span aria-hidden="true"><i class="fa-solid fa-book-open"></i></span><div><h3>Published work will appear here</h3><p>Research entries can be added and managed from the admin panel.</p></div></div>
+        {% endif %}
+      </div>
+    </section>
+
     <!-- AFFILIATE RECOMMENDATIONS -->
     {% if affiliate_links %}
     {% set affiliate_title = split_title(settings.get('affiliate_title', 'Tools I|recommend')) %}
@@ -451,7 +482,6 @@
     <!-- ACADEMY -->
     {% set acad_st = split_title(settings.get('academy_title', 'ENGSAQAWE|Academy')) %}
     <section class="section academy academy--feature" id="academy">
-      {% set academy_panel_url = settings.get('academy_external_url') or url_for('academy.index') %}
       <div class="academy-feature-panel container">
         <div class="academy-feature-copy">
           <h2 class="section__title split-title pop-up-text">{{ acad_st[0] }} <span>{{ acad_st[1] }}</span></h2>
@@ -462,29 +492,10 @@
             <li><i class="fa-solid fa-chart-line"></i> Track your learning progress</li>
             <li><i class="fa-solid fa-infinity"></i> Learn at your own pace</li>
           </ul>
-          <a href="{{ academy_panel_url }}" class="btn btn--primary btn--sm magnetic" {% if settings.get('academy_external_url') %}target="_blank" rel="noopener"{% endif %}>
-            <i class="fa-solid fa-graduation-cap"></i>
-            <span>{{ settings.get('academy_external_label', 'Browse courses') }}</span>
-          </a>
+          <span class="academy-coming-soon"><i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> Coming soon</span>
         </div>
-        <div class="academy-feature-courses" aria-label="Featured Academy courses">
-          {% for course in courses[:2] %}
-          <article class="academy-feature-course pop-up-text" style="--i:{{ loop.index0 }}">
-            <a class="academy-feature-course__cover" href="{{ url_for('academy.course_detail', course_id=course.id) }}" aria-label="View {{ course.title }}">
-              {% if course.thumbnail_url %}<img src="{{ course.thumbnail_url }}" alt="" loading="lazy">{% else %}<i class="fa-solid {{ course.icon or 'fa-book-open' }}" aria-hidden="true"></i>{% endif %}
-              <span>{{ course.level or 'Course' }}</span>
-            </a>
-            <div class="academy-feature-course__body">
-            <p class="academy-feature-course__meta"><i class="fa-solid fa-circle-play"></i> {{ course.lesson_count }} lessons, {{ course.currency or 'USD' }} {{ '%.2f'|format(course.price|float) if course.price|float > 0 else 'Free' }}</p>
-              <h3><a href="{{ url_for('academy.course_detail', course_id=course.id) }}">{{ course.title }}</a></h3>
-              <p>{{ course.description }}</p>
-              <a class="academy-feature-course__link" href="{{ url_for('academy.course_detail', course_id=course.id) }}">Explore course <i class="fa-solid fa-arrow-right"></i></a>
-            </div>
-          </article>
-          {% else %}
-          <div class="academy-feature-empty"><span><i class="fa-solid fa-book-open"></i></span><h3>{{ settings.get('academy_empty_title', 'New courses are coming soon.') }}</h3><p>{{ settings.get('academy_empty', 'Check back soon for practical courses and guided lessons.') }}</p></div>
-          {% endfor %}
-          {% if courses|length > 2 %}<a class="academy-feature-all" href="{{ academy_panel_url }}" {% if settings.get('academy_external_url') %}target="_blank" rel="noopener"{% endif %}>View all courses <i class="fa-solid fa-arrow-right"></i></a>{% endif %}
+        <div class="academy-feature-courses" aria-label="Academy status">
+          <div class="academy-feature-empty academy-feature-empty--coming"><span><i class="fa-solid fa-hourglass-half"></i></span><h3>Coming soon</h3><p>The Academy is being prepared. Course access will open when the learning experience is ready.</p></div>
         </div>
       </div>
     </section>
@@ -570,6 +581,7 @@
       </div>
 
       <div class="contact__grid container">
+        {% if site_user %}
         <form class="contact__form glass reveal-card" id="contact-form" method="POST" action="{{ url_for('home') }}#contact">
   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
           {% with messages = get_flashed_messages(with_categories=true) %}
@@ -585,12 +597,12 @@
           <div class="contact__row">
             <div class="field">
               <label for="name">{{ settings.get('contact_name_label', 'Name') }}</label>
-              <input id="name" name="name" type="text" required placeholder="{{ settings.get('contact_name_placeholder', 'Your name') }}" />
+              <input id="name" name="name" type="text" value="{{ session.site_user_name }}" readonly aria-readonly="true" />
               <span class="field__error"></span>
             </div>
             <div class="field">
               <label for="email">{{ settings.get('contact_email_field_label', 'Email') }}</label>
-              <input id="email" name="email" type="email" required placeholder="{{ settings.get('contact_email_placeholder', 'you@company.com') }}" />
+              <input id="email" name="email" type="email" value="{{ session.site_user_email }}" readonly aria-readonly="true" />
               <span class="field__error"></span>
             </div>
           </div>
@@ -612,8 +624,10 @@
           <button type="submit" class="btn btn--primary magnetic w-full">
             <span>{{ settings.get('contact_submit', 'Send message') }}</span><i class="fa-solid fa-paper-plane"></i>
           </button>
-        <p class="contact__hint"><i class="fa-solid fa-database" aria-hidden="true"></i> {{ settings.get('contact_hint', '') }}</p>
         </form>
+        {% else %}
+        <div class="contact__form glass reveal-card contact-signin"><p class="eyebrow">A quick account is required</p><h3>Start a conversation</h3><p>Sign in or create an account to send a contact request and see my replies in your chat panel.</p><div><a class="btn btn--primary" href="{{ url_for('account_login', next='/#contact') }}">Sign in</a><a class="btn btn--ghost" href="{{ url_for('account_register', next='/#contact') }}">Create account</a></div></div>
+        {% endif %}
 
         <aside class="contact__aside">
           <div class="contact__card glass reveal-card">
@@ -622,7 +636,7 @@
           </div>
           <div class="contact__card glass reveal-card">
             <h3><i class="fa-solid fa-envelope" aria-hidden="true"></i> {{ settings.get('contact_email_label', 'Email') }}</h3>
-            <a href="mailto:{{ profile.email if profile else 'hello@engsaqawe.com' }}">{{ profile.email if profile else 'hello@engsaqawe.com' }}</a>
+            <a href="mailto:{{ profile.email if profile else 'nuurc9399@gmail.com' }}">{{ profile.email if profile else 'nuurc9399@gmail.com' }}</a>
           </div>
           <div class="contact__card glass reveal-card">
             <h3>{{ settings.get('contact_social_label', 'Social') }}</h3>
@@ -700,6 +714,18 @@
     <i class="fa-solid fa-arrow-up"></i>
   </button>
 
+  <section class="site-chat" id="chat-widget" aria-label="Portfolio chat" data-open="false">
+    <button class="fab fab--chat" type="button" id="chatToggle" aria-label="Open chat" aria-expanded="false" aria-controls="chatPanel"><i class="fa-solid fa-comments" aria-hidden="true"></i></button>
+    <div class="site-chat__panel glass" id="chatPanel" aria-hidden="true">
+      <header class="site-chat__head"><div><p class="eyebrow">PORTFOLIO CHAT</p><h2>How can I help?</h2></div><button type="button" id="chatClose" aria-label="Close chat"><i class="fa-solid fa-xmark"></i></button></header>
+      {% if site_user %}
+      <div class="site-chat__welcome"><span>Signed in as {{ session.site_user_name }}</span><form method="post" action="{{ url_for('account_logout') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="site-chat__signout">Sign out</button></form></div>
+      <div class="site-chat__messages" id="chatMessages" aria-live="polite">{% for message in site_chat_messages %}<article class="site-chat__message site-chat__message--{{ message.sender_type }}"><span>{{ 'Me' if message.sender_type == 'user' else 'ENGSAQAWE' }}</span><p>{{ message.body }}</p><time>{{ message.created_at }}</time></article>{% else %}<p class="site-chat__empty">Send a message and I’ll reply here.</p>{% endfor %}</div>
+      <form class="site-chat__form" method="post" action="{{ url_for('chat_send') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><label class="sr-only" for="chatMessage">Your message</label><textarea id="chatMessage" name="message" maxlength="2000" rows="2" placeholder="Write a message…" required></textarea><button aria-label="Send chat message"><i class="fa-solid fa-paper-plane"></i></button></form>
+      {% else %}<div class="site-chat__guest"><p>Sign in or create a free account to chat and view replies.</p><a class="btn btn--primary" href="{{ url_for('account_login', next='/#chat-widget') }}">Sign in</a><a class="btn btn--ghost" href="{{ url_for('account_register', next='/#chat-widget') }}">Create account</a></div>{% endif %}
+    </div>
+  </section>
+
   <div class="modal" id="cert-modal" aria-hidden="true" role="dialog">
     <div class="modal__backdrop" data-modal-close></div>
     <div class="modal__dialog glass modal__dialog--wide">
@@ -734,6 +760,7 @@
   <script src="{{ url_for('static', filename='js/project-stack.js') }}?v=1" defer></script>
   <script src="{{ url_for('static', filename='js/services.js') }}?v=1" defer></script>
   <script src="{{ url_for('static', filename='js/affiliates.js') }}?v=1" defer></script>
+  <script src="{{ url_for('static', filename='js/chat-widget.js') }}?v=1" defer></script>
 </body>
 
 </html>

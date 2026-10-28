@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ 'Create account' if mode == 'register' else 'Sign in' }} · ENGSAQAWE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+</head>
+<body class="account-page">
+  <main class="account-card glass">
+    <a class="account-brand" href="{{ url_for('home') }}">ENGSAQAWE <span>Portfolio</span></a>
+    <p class="eyebrow">{{ 'JOIN THE CONVERSATION' if mode == 'register' else 'WELCOME BACK' }}</p>
+    <h1>{{ 'Create your account' if mode == 'register' else 'Sign in to message' }}</h1>
+    <p class="account-intro">Your account lets you send contact requests and continue conversations with me.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<div class="flash flash--{{ category }}">{{ message }}</div>{% endfor %}{% endwith %}
+    <form method="post" class="account-form">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="next" value="{{ next_url }}">
+      {% if mode == 'register' %}<label>Full name<input name="name" autocomplete="name" maxlength="120" required></label>{% endif %}
+      <label>Email address<input name="email" type="email" autocomplete="email" maxlength="180" required></label>
+      <label>Password<input name="password" type="password" autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}" minlength="{{ 10 if mode == 'register' else 1 }}" required>{% if mode == 'register' %}<small>Use at least 10 characters.</small>{% endif %}</label>
+      <button class="btn btn--primary" type="submit">{{ 'Create account' if mode == 'register' else 'Sign in' }} <span aria-hidden="true">→</span></button>
+    </form>
+    <p class="account-switch">{% if mode == 'register' %}Already registered? <a href="{{ url_for('account_login', next=next_url) }}">Sign in</a>{% else %}New here? <a href="{{ url_for('account_register', next=next_url) }}">Create an account</a>{% endif %}</p>
+    <a class="account-back" href="{{ url_for('home') }}">← Back to portfolio</a>
+  </main>
+</body>
+</html>

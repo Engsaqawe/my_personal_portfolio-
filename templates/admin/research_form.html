@@ -1,0 +1,15 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if item else 'Add' }} Research{% endblock %}
+{% block content %}
+<header class="admin-header"><div><h1>{{ 'Edit publication' if item else 'Add publication' }}</h1><p>Only published entries appear on the public portfolio.</p></div><a class="admin-btn" href="{{ url_for('admin.research_list') }}">← Research</a></header>
+<form class="admin-card admin-form" method="post"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  <label>Paper or journal title<input name="title" maxlength="240" value="{{ item.title if item else '' }}" required></label>
+  <label>Authors<input name="authors" maxlength="500" value="{{ item.authors if item else '' }}" placeholder="Names in publication order"></label>
+  <div class="admin-form__row"><label>Journal / conference / publisher<input name="publication" maxlength="240" value="{{ item.publication if item else '' }}"></label><label>Type<input name="publication_type" maxlength="80" value="{{ item.publication_type if item else 'Journal article' }}" placeholder="Journal article, Conference paper"></label></div>
+  <div class="admin-form__row"><label>Publication date<input type="date" name="published_on" value="{{ item.published_on.strftime('%Y-%m-%d') if item and item.published_on else '' }}"></label><label>DOI<input name="doi" maxlength="255" value="{{ item.doi if item else '' }}" placeholder="10.xxxx/... "></label></div>
+  <label>Publication URL<input type="url" name="url" value="{{ item.url if item else '' }}" placeholder="https://..." ><small>Use a secure HTTPS link to the paper or publisher page.</small></label>
+  <label>Abstract or summary<textarea name="abstract" rows="5" maxlength="5000">{{ item.abstract if item else '' }}</textarea></label>
+  <div class="admin-form__row"><label>Display order<input type="number" name="sort_order" min="0" value="{{ item.sort_order if item else 0 }}"></label><label class="admin-checkbox"><input type="checkbox" name="is_published" value="1" {% if not item or item.is_published %}checked{% endif %}> Published on portfolio</label></div>
+  <button class="admin-btn admin-btn--primary">Save publication</button>
+</form>
+{% endblock %}

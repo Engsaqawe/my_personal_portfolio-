@@ -5,12 +5,14 @@
   <div><h1>Edit affiliate link</h1><p>Changes appear in the Affiliates section below Projects.</p></div>
   <a href="{{ url_for('admin.affiliates_list') }}" class="admin-btn admin-btn--ghost">← Back</a>
 </header>
-<form class="admin-card admin-form" method="POST">
+<form class="admin-card admin-form" method="POST" enctype="multipart/form-data">
   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+  {% if item.image_url %}<div class="admin-current-image"><span>Current thumbnail</span>{% if item.image_url.startswith('http://') or item.image_url.startswith('https://') or item.image_url.startswith('/') %}<img src="{{ item.image_url }}" alt="Current {{ item.label }} thumbnail">{% else %}<img src="{{ url_for('static', filename=item.image_url) }}" alt="Current {{ item.label }} thumbnail">{% endif %}</div>{% endif %}
   <div class="admin-form__grid">
     <label>Link name<input name="label" required value="{{ item.label }}"></label>
     <label>Destination URL<input name="url" type="url" required value="{{ item.url }}"></label>
-    <label>Thumbnail URL<input name="image_url" type="text" value="{{ item.image_url or '' }}" placeholder="https://example.com/logo-or-product-image.jpg"><small>Optional. Use an HTTPS image URL or a file under /static/.</small></label>
+    <label>Upload a new thumbnail<input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><small>{% if item.image_url %}Current image is kept if no file is selected.{% else %}Optional. PNG, JPG, WebP, or GIF.{% endif %}</small></label>
+    {% if item.image_url %}<label class="admin-check"><input name="remove_image" type="checkbox" value="1"> Remove current thumbnail</label>{% endif %}
     <label class="admin-form__full">Card description<textarea name="description" rows="3" maxlength="500" placeholder="A short, accurate description of this product or service.">{{ item.description or '' }}</textarea><small>Optional; the shared fallback description is used when blank.</small></label>
     <label>Display order<input name="sort_order" type="number" value="{{ item.sort_order }}"></label>
     <label class="admin-check"><input name="is_active" type="checkbox" {% if item.is_active %}checked{% endif %}> Show on website</label>

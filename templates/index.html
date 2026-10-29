@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{{ profile.brand_name if profile else 'ENGSAQAWE' }} — Portfolio</title>
   <meta name="description" content="{{ settings.get('meta_description', 'ENGSAQAWE portfolio') }}" />
-  <meta name="theme-color" content="#F3F6F1" />
+  <meta name="theme-color" content="#0a101f" />
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="{{ profile.brand_name if profile else 'ENGSAQAWE' }} — {{ settings.get('job_title', 'Software Engineering') }}" />
@@ -23,10 +23,10 @@
   <script>
     (function () {
       try {
-        var t = localStorage.getItem("engsaqawe-theme") || "light";
+        var t = localStorage.getItem("engsaqawe-theme") || "dark";
         document.documentElement.setAttribute("data-theme", t);
       } catch (e) {
-        document.documentElement.setAttribute("data-theme", "light");
+        document.documentElement.setAttribute("data-theme", "dark");
       }
     })();
   </script>
@@ -464,7 +464,7 @@
           <article class="affiliate-card" data-reveal style="--i:{{ loop.index0 }}">
             <div class="affiliate-card__thumb">
               <span class="affiliate-card__tag">{{ settings.get('affiliate_tag_label', 'Affiliate link') }}</span>
-              {% if item.image_url %}<img src="{{ item.image_url }}" alt="" loading="lazy" referrerpolicy="no-referrer">{% else %}<span class="affiliate-card__mono" aria-hidden="true">{{ item.label[:1]|upper }}</span>{% endif %}
+              {% if item.image_url %}{% if item.image_url.startswith('http://') or item.image_url.startswith('https://') or item.image_url.startswith('/') %}<img src="{{ item.image_url }}" alt="{{ item.label }} thumbnail" loading="lazy" referrerpolicy="no-referrer">{% else %}<img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.label }} thumbnail" loading="lazy">{% endif %}{% else %}<span class="affiliate-card__mono" aria-hidden="true">{{ item.label[:1]|upper }}</span>{% endif %}
             </div>
             <div class="affiliate-card__body">
               <h3 class="affiliate-card__title">{{ item.label }}</h3>
@@ -624,6 +624,7 @@
           <button type="submit" class="btn btn--primary magnetic w-full">
             <span>{{ settings.get('contact_submit', 'Send message') }}</span><i class="fa-solid fa-paper-plane"></i>
           </button>
+          <p class="contact__status" id="contactStatus" role="status" aria-live="polite"></p>
         </form>
         {% else %}
         <div class="contact__form glass reveal-card contact-signin"><p class="eyebrow">A quick account is required</p><h3>Start a conversation</h3><p>Sign in or create an account to send a contact request and see my replies in your chat panel.</p><div><a class="btn btn--primary" href="{{ url_for('account_login', next='/#contact') }}">Sign in</a><a class="btn btn--ghost" href="{{ url_for('account_register', next='/#contact') }}">Create account</a></div></div>
@@ -641,14 +642,7 @@
           <div class="contact__card glass reveal-card">
             <h3>{{ settings.get('contact_social_label', 'Social') }}</h3>
             <ul class="social-list social-list--grid">
-              <li><a href="{{ profile.github_url if profile else 'https://github.com' }}" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i><span>GitHub</span></a></li>
-              <li><a href="{{ profile.linkedin_url if profile else 'https://linkedin.com' }}" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin"></i><span>LinkedIn</span></a></li>
-              <li><a href="https://wa.me/{{ wa_cc }}{{ wa_num }}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span></a></li>
-              <li><a href="{{ profile.facebook_url if profile and profile.facebook_url else 'https://facebook.com/engsaqawe' }}" target="_blank" rel="noopener"><i class="fa-brands fa-facebook"></i><span>Facebook</span></a></li>
-              <li><a href="{{ profile.youtube_url if profile and profile.youtube_url else 'https://youtube.com/@engsaqawe' }}" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i><span>YouTube</span></a></li>
-              {% if profile and profile.twitter_url %}
-              <li><a href="{{ profile.twitter_url }}" target="_blank" rel="noopener"><i class="fa-brands fa-x-twitter"></i><span>X / Twitter</span></a></li>
-              {% endif %}
+              {% for item in footer_social_links %}<li><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer"><i class="{{ item.icon }}" aria-hidden="true"></i><span>{{ item.label }}</span></a></li>{% endfor %}
             </ul>
           </div>
         </aside>
@@ -667,21 +661,12 @@
         <p>© <span id="year"></span> {{ profile.full_name if profile else 'Nor Ali Saqawe' }}. {{ settings.get('footer_rights', 'All rights reserved.') }}</p>
         <a href="{{ url_for('admin.login') }}" class="footer__admin-link"><i class="fa-solid fa-lock"></i> {{ settings.get('footer_admin_label', 'Admin login') }}</a>
         <div class="footer__social">
-          <a href="{{ profile.github_url if profile else 'https://github.com' }}" target="_blank" rel="noopener" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
-          <a href="{{ profile.linkedin_url if profile else 'https://linkedin.com' }}" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
-          <a href="{{ profile.facebook_url if profile and profile.facebook_url else 'https://facebook.com/engsaqawe' }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
-          <a href="{{ profile.youtube_url if profile and profile.youtube_url else 'https://youtube.com/@engsaqawe' }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
-          <a href="https://wa.me/{{ wa_cc }}{{ wa_num }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+          {% for item in footer_social_links %}<a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ item.label }}"><i class="{{ item.icon }}" aria-hidden="true"></i></a>{% endfor %}
         </div>
       </div>
-      {% if footer_projects %}
-      <div class="footer__column footer__projects">
-        <h3>{{ settings.get('footer_projects_heading', 'Selected projects') }}</h3>
-        <ul>{% for project in footer_projects %}<li><a href="{{ project.live_link or '#portfolio' }}" {% if project.live_link %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ project.title }}</a></li>{% endfor %}</ul>
-      </div>
-      {% endif %}
-      {% if footer_links %}
+      {% if footer_link_groups or footer_projects %}
       <div class="footer__columns">
+        {% if footer_projects %}<div class="footer__column"><h3>{{ settings.get('footer_projects_heading', 'Selected projects') }}</h3><ul>{% for project in footer_projects %}<li><a href="{{ project.live_link or '#portfolio' }}" {% if project.live_link %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ project.title }}</a></li>{% endfor %}</ul></div>{% endif %}
         {% for section_title, group in footer_link_groups %}
         <div class="footer__column">
           <h3>{{ section_title }}</h3>
@@ -718,10 +703,11 @@
     <button class="fab fab--chat" type="button" id="chatToggle" aria-label="Open chat" aria-expanded="false" aria-controls="chatPanel"><i class="fa-solid fa-comments" aria-hidden="true"></i></button>
     <div class="site-chat__panel glass" id="chatPanel" aria-hidden="true">
       <header class="site-chat__head"><div><p class="eyebrow">PORTFOLIO CHAT</p><h2>How can I help?</h2></div><button type="button" id="chatClose" aria-label="Close chat"><i class="fa-solid fa-xmark"></i></button></header>
+      <article class="site-chat__greeting"><span>ENGSAQAWE</span><p>Hello! I’m Engsaqawe. How can I help you today?</p><a href="https://wa.me/252684421687" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i> You can also message me on WhatsApp</a></article>
       {% if site_user %}
       <div class="site-chat__welcome"><span>Signed in as {{ session.site_user_name }}</span><form method="post" action="{{ url_for('account_logout') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="site-chat__signout">Sign out</button></form></div>
       <div class="site-chat__messages" id="chatMessages" aria-live="polite">{% for message in site_chat_messages %}<article class="site-chat__message site-chat__message--{{ message.sender_type }}"><span>{{ 'Me' if message.sender_type == 'user' else 'ENGSAQAWE' }}</span><p>{{ message.body }}</p><time>{{ message.created_at }}</time></article>{% else %}<p class="site-chat__empty">Send a message and I’ll reply here.</p>{% endfor %}</div>
-      <form class="site-chat__form" method="post" action="{{ url_for('chat_send') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><label class="sr-only" for="chatMessage">Your message</label><textarea id="chatMessage" name="message" maxlength="2000" rows="2" placeholder="Write a message…" required></textarea><button aria-label="Send chat message"><i class="fa-solid fa-paper-plane"></i></button></form>
+      <form class="site-chat__form" id="chatForm" method="post" action="{{ url_for('chat_send') }}"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><label class="sr-only" for="chatMessage">Your message</label><textarea id="chatMessage" name="message" maxlength="2000" rows="2" placeholder="Write a message…" required></textarea><button aria-label="Send chat message"><i class="fa-solid fa-paper-plane"></i></button></form><p class="site-chat__status" id="chatStatus" role="status" aria-live="polite"></p>
       {% else %}<div class="site-chat__guest"><p>Sign in or create a free account to chat and view replies.</p><a class="btn btn--primary" href="{{ url_for('account_login', next='/#chat-widget') }}">Sign in</a><a class="btn btn--ghost" href="{{ url_for('account_register', next='/#chat-widget') }}">Create account</a></div>{% endif %}
     </div>
   </section>

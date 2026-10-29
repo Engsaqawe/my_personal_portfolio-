@@ -3,7 +3,9 @@
 {% block content %}
 <header class="admin-header"><div><h1>Visitor Chats</h1><p>Reply to conversations started by registered visitors.</p></div></header>
 <div class="admin-card admin-table-wrap"><table class="admin-table admin-table--responsive"><thead><tr><th>Visitor</th><th>Latest message</th><th>Updated</th><th>Action</th></tr></thead><tbody>
-{% for chat in chats %}<tr><td data-label="Visitor"><strong>{{ chat.name }}</strong><br><a href="mailto:{{ chat.email }}">{{ chat.email }}</a></td><td data-label="Latest message">{{ chat.last_message or '' }}</td><td data-label="Updated">{{ chat.updated_at }}</td><td data-label="Action"><a class="admin-btn admin-btn--sm" href="{{ url_for('admin.chat_detail', chat_id=chat.id) }}">Open conversation</a></td></tr>
+{% for chat in chats %}<tr><td data-label="Visitor"><strong>{{ chat.name }}</strong><br><a href="mailto:{{ chat.email }}">{{ chat.email }}</a></td><td data-label="Latest message">{{ chat.last_message or '' }}</td><td data-label="Updated">{{ chat.updated_at }}</td><td data-label="Action"><button type="button" class="admin-btn admin-btn--sm" data-message-open data-person="{{ chat.name }}" data-email="{{ chat.email }}" data-message="{{ chat.last_message or '' }}" data-reply-url="{{ url_for('admin.chat_detail', chat_id=chat.id) }}">View & reply</button></td></tr>
 {% else %}<tr><td colspan="4" class="admin-muted">No visitor chats yet.</td></tr>{% endfor %}
 </tbody></table></div>
+<dialog class="admin-message-dialog" id="adminMessageDialog" aria-labelledby="adminMessageTitle"><header><div><p class="admin-muted">VISITOR MESSAGE</p><h2 id="adminMessageTitle"></h2><a id="adminMessageEmail"></a></div><button type="button" data-message-close aria-label="Close message">×</button></header><p class="admin-message-dialog__body" id="adminMessageBody"></p><footer><button type="button" class="admin-btn" data-message-close>Close</button><a class="admin-btn admin-btn--primary" id="adminMessageReply">Reply</a></footer></dialog>
+<script src="{{ url_for('static', filename='js/admin-message-dialog.js') }}" defer></script>
 {% endblock %}

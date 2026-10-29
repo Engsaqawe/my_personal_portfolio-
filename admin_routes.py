@@ -4,6 +4,7 @@ import os
 import re
 from datetime import datetime
 from urllib.parse import urlparse
+from zoneinfo import ZoneInfo
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from auth import admin_required, login_admin, get_admin_by_id
 from db_helpers import query_all, query_one, execute, execute_returning_id
@@ -11,21 +12,6 @@ from database import get_db
 from uploads import save_upload
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
-
-
-def safe_affiliate_image_url(value):
-    value = (value or "").strip()
-    if not value or "\\" in value or any(ord(char) < 32 for char in value):
-        return None
-    try:
-        parsed = urlparse(value)
-    except ValueError:
-        return None
-    if value.startswith("/static/") and not value.startswith("//"):
-        return value
-    if parsed.scheme == "https" and parsed.netloc and not parsed.username and not parsed.password:
-        return value
-    return None
 
 
 def safe_affiliate_destination(value):
@@ -75,6 +61,7 @@ def logout():
 @admin_bp.route("/")
 @admin_required
 def dashboard():
+    today = datetime.now(ZoneInfo("Africa/Mogadishu")).date()
     stats = {
         "projects": query_one("SELECT COUNT(*) AS c FROM projects")["c"],
         "services": query_one("SELECT COUNT(*) AS c FROM services")["c"],
@@ -84,6 +71,8 @@ def dashboard():
         "gallery": query_one("SELECT COUNT(*) AS c FROM gallery")["c"],
         "contacts": query_one("SELECT COUNT(*) AS c FROM contacts")["c"],
         "unread_contacts": query_one("SELECT COUNT(*) AS c FROM contacts")["c"],
+        "visitors_today": query_one("SELECT COUNT(*) AS c FROM visitor_daily_visits WHERE visit_date=%s", (today,))["c"],
+        "visitors_total": query_one("SELECT COUNT(*) AS c FROM visitor_registry")["c"],
     }
     recent_contacts = query_all(
         "SELECT * FROM contacts ORDER BY created_at DESC LIMIT 5"
@@ -519,7 +508,10 @@ def gallery_delete(item_id):
 @admin_bp.route("/contacts")
 @admin_required
 def contacts_list():
-    items = query_all("SELECT * FROM contacts ORDER BY created_at DESC")
+    items = query_all("""SELECT c.*,
+        (SELECT sc.id FROM site_chats sc JOIN site_users su ON su.id=sc.user_id
+         WHERE su.email=c.email ORDER BY sc.id DESC LIMIT 1) AS chat_id
+        FROM contacts c ORDER BY c.created_at DESC""")
     return render_template("admin/contacts_list.html", contacts=items)
 
 
@@ -743,13 +735,18 @@ def affiliates_list():
     if request.method == "POST":
         label = (request.form.get("label") or "").strip()
         link = (request.form.get("url") or "").strip()
-        image_url = (request.form.get("image_url") or "").strip()
         description = (request.form.get("description") or "").strip()
         safe_link = safe_affiliate_destination(link)
-        safe_image = safe_affiliate_image_url(image_url)
-        if not label or len(label) > 120 or len(link) > 500 or len(image_url) > 500 or len(description) > 500 or not safe_link or (image_url and not safe_image):
-            flash("Enter a name, a valid link, a description up to 500 characters, and an optional HTTPS or local thumbnail URL.", "error")
+        image_url = None
+        if not label or len(label) > 120 or len(link) > 500 or len(description) > 500 or not safe_link:
+            flash("Enter a name, a valid destination link, and a description up to 500 characters.", "error")
         else:
+            if request.files.get("image") and request.files["image"].filename:
+                try:
+                    image_url = save_upload(request.files["image"], current_app.root_path)
+                except ValueError as exc:
+                    flash(str(exc), "error")
+                    return redirect(url_for("admin.affiliates_list"))
             try:
                 order = int(request.form.get("sort_order") or 0)
             except ValueError:
@@ -757,7 +754,7 @@ def affiliates_list():
             execute(
                 """INSERT INTO footer_links (section_title, label, url, image_url, description, sort_order, section_order, is_active)
                    VALUES ('Affiliate links', %s, %s, %s, %s, %s, 0, %s)""",
-                (label, link, safe_image, description or None, order, 1 if request.form.get("is_active") else 0),
+                (label, link, image_url, description or None, order, 1 if request.form.get("is_active") else 0),
             )
             flash("Affiliate link added.", "success")
             return redirect(url_for("admin.affiliates_list"))
@@ -784,21 +781,26 @@ def affiliate_edit(item_id):
     if request.method == "POST":
         label = (request.form.get("label") or "").strip()
         link = (request.form.get("url") or "").strip()
-        image_url = (request.form.get("image_url") or "").strip()
         description = (request.form.get("description") or "").strip()
         safe_link = safe_affiliate_destination(link)
-        safe_image = safe_affiliate_image_url(image_url)
+        image_url = None if request.form.get("remove_image") else item["image_url"]
         try:
             order = int(request.form.get("sort_order") or 0)
         except ValueError:
             order = 0
-        if not label or len(label) > 120 or len(link) > 500 or len(image_url) > 500 or len(description) > 500 or not safe_link or (image_url and not safe_image):
-            flash("Enter a name, a valid link, a description up to 500 characters, and an optional HTTPS or local thumbnail URL.", "error")
+        if not label or len(label) > 120 or len(link) > 500 or len(description) > 500 or not safe_link:
+            flash("Enter a name, a valid destination link, and a description up to 500 characters.", "error")
         else:
+            if request.files.get("image") and request.files["image"].filename:
+                try:
+                    image_url = save_upload(request.files["image"], current_app.root_path)
+                except ValueError as exc:
+                    flash(str(exc), "error")
+                    return render_template("admin/affiliate_form.html", item=item)
             execute(
                 """UPDATE footer_links SET label=%s, url=%s, image_url=%s, description=%s, sort_order=%s, is_active=%s,
                    section_title='Affiliate links', section_order=0 WHERE id=%s""",
-                (label, link, safe_image, description or None, order, 1 if request.form.get("is_active") else 0, item_id),
+                (label, link, image_url, description or None, order, 1 if request.form.get("is_active") else 0, item_id),
             )
             flash("Affiliate link updated.", "success")
             return redirect(url_for("admin.affiliates_list"))
@@ -824,9 +826,14 @@ def footer_links():
         title = (request.form.get("section_title") or "").strip()
         label = (request.form.get("label") or "").strip()
         link = (request.form.get("url") or "").strip()
-        safe_link = link.startswith(("/", "#", "https://", "http://", "mailto:", "tel:"))
-        if not title or not label or not safe_link:
+        safe_link = link.startswith(("/", "#", "https://", "http://", "mailto:", "tel:")) and not link.startswith("//") and "\\" not in link
+        reserved_section = " ".join(title.casefold().split())
+        if not title or len(title) > 120 or not label or len(label) > 120 or len(link) > 500 or not safe_link:
             flash("Section, label, and URL are required.", "error")
+        elif reserved_section in {"affiliate links", "affiliates"}:
+            flash("Manage affiliate links from the Affiliate Links section so they appear only once.", "error")
+        elif reserved_section == "selected projects":
+            flash("Selected project links come from your Projects list and are included in the footer automatically.", "error")
         else:
             try:
                 order = int(request.form.get("sort_order") or 0)
@@ -838,14 +845,15 @@ def footer_links():
                 (title, label, link, order, section_order, 1 if request.form.get("is_active") else 0))
             flash("Footer link added.", "success")
             return redirect(url_for("admin.footer_links"))
-    links = query_all("SELECT * FROM footer_links ORDER BY section_order, sort_order, id")
-    return render_template("admin/footer_links.html", links=links)
+    links = query_all("SELECT * FROM footer_links WHERE LOWER(TRIM(section_title)) NOT IN ('affiliate links','affiliates','selected projects') ORDER BY section_order, sort_order, id")
+    selected_projects = query_all("SELECT id,title,live_link FROM projects ORDER BY sort_order,id LIMIT 5")
+    return render_template("admin/footer_links.html", links=links, selected_projects=selected_projects)
 
 
 @admin_bp.route("/footer-links/<int:item_id>/delete", methods=["POST"])
 @admin_required
 def footer_link_delete(item_id):
-    execute("DELETE FROM footer_links WHERE id = %s", (item_id,))
+    execute("DELETE FROM footer_links WHERE id = %s AND LOWER(TRIM(section_title)) NOT IN ('affiliate links','affiliates','selected projects')", (item_id,))
     flash("Footer link deleted.", "success")
     return redirect(url_for("admin.footer_links"))
 
@@ -853,7 +861,7 @@ def footer_link_delete(item_id):
 @admin_bp.route("/footer-links/<int:item_id>/edit", methods=["GET", "POST"])
 @admin_required
 def footer_link_edit(item_id):
-    item = query_one("SELECT * FROM footer_links WHERE id = %s", (item_id,))
+    item = query_one("SELECT * FROM footer_links WHERE id = %s AND LOWER(TRIM(section_title)) NOT IN ('affiliate links','affiliates','selected projects')", (item_id,))
     if not item:
         flash("Footer link not found.", "error")
         return redirect(url_for("admin.footer_links"))
@@ -866,9 +874,14 @@ def footer_link_edit(item_id):
             section_order = int(request.form.get("section_order") or 0)
         except ValueError:
             order = section_order = 0
-        safe_link = link.startswith(("/", "#", "https://", "http://", "mailto:", "tel:"))
+        safe_link = link.startswith(("/", "#", "https://", "http://", "mailto:", "tel:")) and not link.startswith("//") and "\\" not in link
+        reserved_section = " ".join(title.casefold().split())
         if not title or not label or not safe_link:
             flash("Section, label, and URL are required.", "error")
+        elif reserved_section in {"affiliate links", "affiliates"}:
+            flash("Manage affiliate links from the Affiliate Links section so they appear only once.", "error")
+        elif reserved_section == "selected projects":
+            flash("Selected project links come from your Projects list and are included in the footer automatically.", "error")
         else:
             execute("""UPDATE footer_links SET section_title=%s, label=%s, url=%s,
                 sort_order=%s, section_order=%s, is_active=%s WHERE id=%s""",

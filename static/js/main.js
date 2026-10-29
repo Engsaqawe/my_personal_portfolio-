@@ -1019,8 +1019,40 @@
 
       if (!valid) return;
 
-      // Valid — submit to Flask/MySQL
-      form.submit();
+      const status = qs("#contactStatus");
+      const submit = form.querySelector('button[type="submit"]');
+      const submitLabel = submit?.querySelector("span");
+      if (submit) submit.disabled = true;
+      if (submitLabel) {
+        submit.dataset.defaultLabel = submitLabel.textContent;
+        submitLabel.textContent = "Sending…";
+      }
+      if (status) status.textContent = "";
+      fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { "X-Requested-With": "XMLHttpRequest", Accept: "application/json" },
+        credentials: "same-origin",
+      }).then(async (response) => {
+        const result = await response.json();
+        if (!response.ok) {
+          if (response.status === 401) {
+            window.location.assign(`/account/login?next=${encodeURIComponent("/#contact")}`);
+            return;
+          }
+          throw new Error(result.message || "The message could not be sent.");
+        }
+        if (status) status.textContent = result.message;
+        const messageInput = qs("#message", form);
+        if (messageInput) messageInput.value = "";
+        const count = qs("#messageCount");
+        if (count) count.textContent = "0";
+      }).catch((error) => {
+        if (status) status.textContent = error.message || "Could not send your message. Please try again.";
+      }).finally(() => {
+        if (submit) submit.disabled = false;
+        if (submitLabel) submitLabel.textContent = submit.dataset.defaultLabel || "Send message";
+      });
     });
 
     // Live clear errors
@@ -1085,7 +1117,7 @@
       btn.setAttribute("aria-label", theme === "light" ? "Switch to dark theme" : "Switch to light theme");
     };
 
-    applyTheme(root.getAttribute("data-theme") || "light");
+    applyTheme(root.getAttribute("data-theme") || "dark");
 
     btn.addEventListener("click", () => {
       const next = root.getAttribute("data-theme") === "light" ? "dark" : "light";

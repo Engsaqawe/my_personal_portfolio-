@@ -2,10 +2,16 @@
 
 import os
 import secrets
-from datetime import timedelta
+import hashlib
+import smtplib
+import ssl
+from datetime import datetime, timedelta
+from email.message import EmailMessage
+from email.utils import formataddr
 from hmac import compare_digest
 from urllib.parse import urlsplit
-from flask import Flask, render_template, request, flash, redirect, url_for, abort, Response, jsonify, session
+from zoneinfo import ZoneInfo
+from flask import Flask, render_template, request, flash, redirect, url_for, abort, Response, jsonify, session, g
 from xml.sax.saxutils import escape
 from db_helpers import query_all, query_one, execute, execute_returning_id
 from database import get_db
@@ -39,6 +45,36 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
     PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
 )
+VISITOR_TIMEZONE = ZoneInfo("Africa/Mogadishu")
+VISITOR_COOKIE = "engsaqawe_visitor"
+NOTIFICATION_EMAIL = "nuurc9399@gmail.com"
+
+
+def send_message_notification(name, email, message, channel):
+    """Send a best-effort Gmail notification using the project's local app password."""
+    app_password = (os.getenv("app_password") or os.getenv("GMAIL_APP_PASSWORD") or "").replace(" ", "")
+    if not app_password:
+        app.logger.warning("Message notification skipped: Gmail app password is not configured.")
+        return False
+    sender_email = (os.getenv("GMAIL_ADDRESS") or os.getenv("SMTP_USERNAME") or NOTIFICATION_EMAIL).strip()
+    sender_name = " ".join((os.getenv("app_name") or "ENGSAQAWE Portfolio").split())[:100] or "ENGSAQAWE Portfolio"
+    display_name = " ".join((name or "Visitor").split())[:120]
+    email_message = EmailMessage()
+    email_message["Subject"] = f"New portfolio {channel} message from {display_name}"
+    email_message["From"] = formataddr((sender_name, sender_email))
+    email_message["To"] = NOTIFICATION_EMAIL
+    email_message.set_content(
+        f"A new message was sent through your portfolio {channel}.\n\n"
+        f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}\n"
+    )
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=8, context=ssl.create_default_context()) as smtp:
+            smtp.login(sender_email, app_password)
+            smtp.send_message(email_message)
+        return True
+    except (OSError, smtplib.SMTPException) as exc:
+        app.logger.warning("Portfolio message notification failed (%s).", type(exc).__name__)
+        return False
 
 
 @app.before_request
@@ -86,7 +122,55 @@ def add_security_headers(response):
     response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
     response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    visitor_cookie = getattr(g, "visitor_cookie_to_set", None)
+    if visitor_cookie:
+        response.set_cookie(
+            VISITOR_COOKIE,
+            visitor_cookie,
+            max_age=60 * 60 * 24 * 365,
+            httponly=True,
+            secure=(APP_ENV == "production"),
+            samesite="Lax",
+        )
     return response
+
+
+@app.before_request
+def record_unique_public_visitor():
+    """Count distinct browser cookies once per Mogadishu calendar day."""
+    if request.method != "GET" or request.endpoint in {"static", "chat_messages"}:
+        return None
+    if request.path.startswith("/admin/") or session.get("admin_id"):
+        return None
+    user_agent = (request.headers.get("User-Agent") or "").casefold()
+    if any(token in user_agent for token in ("bot", "crawler", "spider", "slurp", "preview")):
+        return None
+    visitor_cookie = request.cookies.get(VISITOR_COOKIE)
+    if not visitor_cookie or len(visitor_cookie) > 100:
+        visitor_cookie = secrets.token_urlsafe(32)
+        g.visitor_cookie_to_set = visitor_cookie
+    visitor_key = hashlib.sha256(visitor_cookie.encode("utf-8")).hexdigest()
+    local_now = datetime.now(VISITOR_TIMEZONE).replace(tzinfo=None)
+    local_today = local_now.date()
+    conn = get_db()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO visitor_registry (visitor_key,first_seen_at,last_seen_at) VALUES (%s,%s,%s)
+                   ON DUPLICATE KEY UPDATE last_seen_at=VALUES(last_seen_at)""",
+                (visitor_key, local_now, local_now),
+            )
+            cur.execute(
+                "INSERT IGNORE INTO visitor_daily_visits (visitor_key,visit_date,first_visit_at) VALUES (%s,%s,%s)",
+                (visitor_key, local_today, local_now),
+            )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+    return None
 
 app.jinja_env.globals.update(
     tech_meta=tech_meta,
@@ -99,6 +183,30 @@ app.jinja_env.globals.update(
 
 app.register_blueprint(admin_bp)
 app.register_blueprint(academy_bp)
+
+
+def social_icon(label, url=""):
+    value = f"{label or ''} {url or ''}".casefold()
+    icons = (
+        (("github",), "fa-brands fa-github"),
+        (("linkedin",), "fa-brands fa-linkedin"),
+        (("facebook",), "fa-brands fa-facebook"),
+        (("instagram",), "fa-brands fa-instagram"),
+        (("youtube",), "fa-brands fa-youtube"),
+        (("whatsapp", "wa.me"), "fa-brands fa-whatsapp"),
+        (("twitter", "x.com", "x-twitter"), "fa-brands fa-x-twitter"),
+        (("telegram", "t.me"), "fa-brands fa-telegram"),
+        (("tiktok",), "fa-brands fa-tiktok"),
+        (("discord",), "fa-brands fa-discord"),
+        (("medium",), "fa-brands fa-medium"),
+    )
+    for needles, icon in icons:
+        if any(needle in value for needle in needles):
+            return icon
+    return "fa-solid fa-link"
+
+
+app.jinja_env.globals.update(social_icon=social_icon)
 
 # Keep newly added CMS tables available on deployed WSGI servers as well as local runs.
 try:
@@ -129,8 +237,11 @@ def get_hero_image(profile, gallery):
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
+        wants_json = request.headers.get("X-Requested-With") == "XMLHttpRequest"
         user_id = session.get("site_user_id")
         if not user_id:
+            if wants_json:
+                return jsonify({"ok": False, "message": "Sign in before sending a message."}), 401
             flash("Please sign in or create an account before sending a message.", "error")
             return redirect(url_for("account_login", next="/#contact"))
         user = query_one("SELECT id, name, email FROM site_users WHERE id=%s AND is_active=1", (user_id,))
@@ -138,16 +249,24 @@ def home():
             session.pop("site_user_id", None)
             session.pop("site_user_name", None)
             session.pop("site_user_email", None)
+            if wants_json:
+                return jsonify({"ok": False, "message": "Please sign in again."}), 401
             return redirect(url_for("account_login", next="/#contact"))
         name, email = user["name"], user["email"]
         project_type = (request.form.get("projectType") or "").strip()
         message = (request.form.get("message") or "").strip()
 
         if not name or not email or not message:
+            if wants_json:
+                return jsonify({"ok": False, "message": "Please enter a message."}), 400
             flash("Please fill in all required fields.", "error")
         elif len(project_type) > 80:
+            if wants_json:
+                return jsonify({"ok": False, "message": "Please choose a valid project type."}), 400
             flash("Please choose a valid project type.", "error")
         elif len(message) > 250:
+            if wants_json:
+                return jsonify({"ok": False, "message": "Messages must be 250 characters or fewer."}), 400
             flash("Messages must be 250 characters or fewer.", "error")
         else:
             conn = get_db()
@@ -165,10 +284,14 @@ def home():
                 raise
             finally:
                 conn.close()
+            send_message_notification(name, email, message, "contact")
+            if wants_json:
+                return jsonify({"ok": True, "message": "Your message was sent. I’ll reply in the chat panel."}), 201
             flash("Message saved. I will get back to you soon.", "success")
             return redirect(url_for("home") + "#contact")
 
     profile = query_one("SELECT * FROM profile WHERE id = 1")
+    settings = get_site_settings()
     projects = query_all("SELECT * FROM projects WHERE featured = 1 ORDER BY sort_order ASC, id ASC")
     services = query_all("SELECT * FROM services WHERE is_active = 1 ORDER BY sort_order ASC, id ASC")
     footer_projects = query_all("SELECT title, live_link FROM projects ORDER BY sort_order ASC, id ASC LIMIT 5")
@@ -180,19 +303,49 @@ def home():
     blog_posts = query_all("SELECT id, title, slug, excerpt, cover_image, category, author, published_at FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC, id DESC LIMIT 3")
     research_items = query_all("SELECT * FROM research_items WHERE is_published=1 ORDER BY sort_order ASC, published_on DESC, id DESC")
     footer_links = query_all("SELECT * FROM footer_links WHERE is_active = 1 ORDER BY section_order ASC, sort_order ASC, id ASC")
-    affiliate_links = [
-        item for item in footer_links
-        if (item.get("section_title") or "").strip().casefold() == "affiliate links"
-    ]
-    footer_link_groups = {}
+    affiliate_links = []
+    affiliate_urls = set()
+    affiliate_group_names = {"affiliate links", "affiliates"}
     for item in footer_links:
-        if (item.get("section_title") or "").strip().casefold() == "affiliate links":
+        if (item.get("section_title") or "").strip().casefold() not in affiliate_group_names:
+            continue
+        destination = (item.get("url") or "").strip().rstrip("/").casefold()
+        if destination and destination in affiliate_urls:
+            continue
+        if destination:
+            affiliate_urls.add(destination)
+        affiliate_links.append(item)
+    footer_link_groups = {}
+    social_group_names = {"social", "social links"}
+    for item in footer_links:
+        group_name = " ".join((item.get("section_title") or "").casefold().split())
+        if group_name in affiliate_group_names | social_group_names | {"selected projects"}:
             continue
         footer_link_groups.setdefault(item["section_title"], []).append(item)
+    footer_social_links = [
+        {"label": item["label"], "url": item["url"], "icon": social_icon(item["label"], item["url"])}
+        for item in footer_links
+        if " ".join((item.get("section_title") or "").casefold().split()) in social_group_names
+    ]
+    if not footer_social_links:
+        social_fields = (
+            ("GitHub", "github_url"), ("LinkedIn", "linkedin_url"),
+            ("Facebook", "facebook_url"), ("YouTube", "youtube_url"),
+            ("X / Twitter", "twitter_url"),
+        )
+        for label, field in social_fields:
+            destination = (profile or {}).get(field)
+            if destination:
+                footer_social_links.append({"label": label, "url": destination, "icon": social_icon(label, destination)})
+        phone = (profile or {}).get("whatsapp") or "684421687"
+        country_code = settings.get("whatsapp_country_code", "252") or "252"
+        footer_social_links.append({
+            "label": "WhatsApp",
+            "url": f"https://wa.me/{country_code}{phone}",
+            "icon": social_icon("WhatsApp", "wa.me"),
+        })
     gallery = get_gallery()
     hero_image = get_hero_image(profile, gallery)
-    settings = get_site_settings()
-
     skills_cards = [
         {"icon": icon or "fa-code", "title": title, "text": text}
         for icon, title, text in parse_pipe_lines(settings.get("skills_cards", ""), 3)
@@ -233,6 +386,7 @@ def home():
             JOIN site_chats c ON c.id=m.chat_id WHERE c.user_id=%s ORDER BY m.id ASC""", (session["site_user_id"],)) if session.get("site_user_id") else []),
         footer_links=footer_links,
         footer_link_groups=footer_link_groups.items(),
+        footer_social_links=footer_social_links,
         gallery=gallery,
         hero_image=hero_image,
         settings=settings,
@@ -314,11 +468,22 @@ def account_logout():
 
 @app.route("/chat/send", methods=["POST"])
 def chat_send():
+    wants_json = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     user_id = session.get("site_user_id")
     if not user_id:
+        if wants_json:
+            return jsonify({"ok": False, "message": "Sign in before sending a chat message."}), 401
+        return redirect(url_for("account_login", next="/#chat-widget"))
+    user = query_one("SELECT id,name,email FROM site_users WHERE id=%s AND is_active=1", (user_id,))
+    if not user:
+        session.pop("site_user_id", None)
+        if wants_json:
+            return jsonify({"ok": False, "message": "Please sign in again."}), 401
         return redirect(url_for("account_login", next="/#chat-widget"))
     message = (request.form.get("message") or "").strip()
     if not message or len(message) > 2000:
+        if wants_json:
+            return jsonify({"ok": False, "message": "Chat messages must be between 1 and 2,000 characters."}), 400
         flash("Chat messages must be between 1 and 2,000 characters.", "error")
         return redirect(url_for("home") + "#chat-widget")
     conn = get_db()
@@ -333,6 +498,9 @@ def chat_send():
         raise
     finally:
         conn.close()
+    send_message_notification(user["name"], user["email"], message, "chat")
+    if wants_json:
+        return jsonify({"ok": True, "message": "Message sent."}), 201
     return redirect(url_for("home") + "#chat-widget")
 
 

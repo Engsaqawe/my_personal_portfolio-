@@ -42,6 +42,21 @@ CREATE TABLE IF NOT EXISTS site_chat_messages (
     INDEX site_chat_message_order (chat_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS visitor_registry (
+    visitor_key CHAR(64) PRIMARY KEY,
+    first_seen_at DATETIME NOT NULL,
+    last_seen_at DATETIME NOT NULL,
+    INDEX visitor_last_seen (last_seen_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS visitor_daily_visits (
+    visitor_key CHAR(64) NOT NULL,
+    visit_date DATE NOT NULL,
+    first_visit_at DATETIME NOT NULL,
+    PRIMARY KEY (visitor_key, visit_date),
+    INDEX visitor_day (visit_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS research_items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(240) NOT NULL,
@@ -520,6 +535,7 @@ def seed():
             # Update only the previous public default; preserve a custom email set by the owner.
             cur.execute("UPDATE profile SET email=%s WHERE id=1 AND email=%s", ("nuurc9399@gmail.com", "hello@engsaqawe.com"))
             cur.execute("UPDATE site_settings SET setting_value='' WHERE setting_key='contact_hint' AND setting_value=%s", ("Your message is saved to the database.",))
+            cur.execute("UPDATE footer_links SET section_title='Affiliate links', section_order=0 WHERE LOWER(TRIM(section_title)) IN ('affiliate links','affiliates')")
 
             cur.execute("SELECT COUNT(*) AS c FROM admins")
             if cur.fetchone()["c"] == 0:

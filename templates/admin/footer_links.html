@@ -1,11 +1,12 @@
 {% extends "admin/base.html" %}
 {% block title %}Footer Links{% endblock %}
 {% block content %}
-<header class="admin-header"><div><h1>Footer links</h1><p>Build groups such as Projects, Websites, or Affiliate links. Add any custom group you need.</p></div></header>
+<header class="admin-header"><div><h1>Footer &amp; social links</h1><p>Manage footer groups and social icons here. Add social profiles under a section named “Social Links”; delete them from the list below. Affiliate links are managed separately.</p></div></header>
+<section class="admin-card admin-footer-projects"><div><h2>Selected projects</h2><p class="admin-muted">These project links appear in the footer alongside your footer links. Edit project details in Projects.</p></div><ul>{% for project in selected_projects %}<li><span>{{ project.title }}</span><a href="{{ url_for('admin.project_form', item_id=project.id) }}" class="admin-btn admin-btn--sm">Edit project</a></li>{% else %}<li class="admin-muted">No projects yet. Add one in Projects and it will appear here.</li>{% endfor %}</ul></section>
 <form class="admin-card admin-form" method="POST">
   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
   <h2>Add a footer link</h2>
-  <div class="admin-form__grid"><label>Section name<input name="section_title" required placeholder="Projects, Websites, Affiliate links…"></label><label>Link label<input name="label" required placeholder="My latest project"></label><label>URL<input name="url" required placeholder="/ or https://example.com"></label><label>Link order<input type="number" name="sort_order" value="0"></label><label>Section order<input type="number" name="section_order" value="0"></label><label class="admin-check"><input type="checkbox" name="is_active" checked> Show on website</label></div>
+  <div class="admin-form__grid"><label>Section name<input name="section_title" required placeholder="Social Links, Websites, Resources"></label><label>Link label<input name="label" required placeholder="GitHub, LinkedIn, Instagram"></label><label>URL<input name="url" required placeholder="https://example.com/profile"></label><label>Link order<input type="number" name="sort_order" value="0"></label><label>Section order<input type="number" name="section_order" value="0"></label><label class="admin-check"><input type="checkbox" name="is_active" checked> Show on website</label></div>
   <button class="admin-btn admin-btn--primary" type="submit">Add link</button>
 </form>
 <div class="admin-card admin-table-wrap"><table class="admin-table admin-table--responsive"><thead><tr><th>Section</th><th>Label</th><th>URL</th><th>Visible</th><th>Actions</th></tr></thead><tbody>

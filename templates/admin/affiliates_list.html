@@ -5,13 +5,13 @@
   <div><h1>Affiliate links</h1><p>Manage the thumbnail, description, button destination, visibility, and display order for each recommendation.</p></div>
 </header>
 
-<form class="admin-card admin-form" method="POST">
+<form class="admin-card admin-form" method="POST" enctype="multipart/form-data">
   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
   <h2>Add an affiliate link</h2>
   <div class="admin-form__grid">
     <label>Link name<input name="label" required placeholder="Namecheap Hosting"></label>
     <label>Destination URL<input name="url" type="url" required placeholder="https://example.com/your-partner-link"></label>
-    <label>Thumbnail URL<input name="image_url" type="text" placeholder="https://example.com/logo-or-product-image.jpg"><small>Optional. Use an HTTPS image URL or a file under /static/.</small></label>
+    <label>Upload thumbnail<input name="image" type="file" accept="image/png,image/jpeg,image/webp,image/gif"><small>Optional. Upload PNG, JPG, WebP, or GIF.</small></label>
     <label class="admin-form__full">Card description<textarea name="description" rows="2" maxlength="500" placeholder="A short, accurate description of this product or service."></textarea><small>Optional; the shared fallback description is used when blank.</small></label>
     <label>Display order<input name="sort_order" type="number" value="0"></label>
     <label class="admin-check"><input name="is_active" type="checkbox" checked> Show on website</label>
@@ -26,7 +26,7 @@
       {% for item in links %}
       <tr>
         <td data-label="Name"><strong>{{ item.label }}</strong></td>
-        <td data-label="Thumbnail">{% if item.image_url %}<img src="{{ item.image_url }}" alt="{{ item.label }} thumbnail" width="56" height="56" loading="lazy" style="object-fit:cover;border-radius:10px">{% else %}<span class="admin-muted">None</span>{% endif %}</td>
+        <td data-label="Thumbnail">{% if item.image_url %}{% if item.image_url.startswith('http://') or item.image_url.startswith('https://') or item.image_url.startswith('/') %}<img src="{{ item.image_url }}" alt="{{ item.label }} thumbnail" width="56" height="56" loading="lazy" style="object-fit:cover;border-radius:10px">{% else %}<img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.label }} thumbnail" width="56" height="56" loading="lazy" style="object-fit:cover;border-radius:10px">{% endif %}{% else %}<span class="admin-muted">None</span>{% endif %}</td>
         <td data-label="Description">{{ item.description or 'Uses shared fallback' }}</td>
         <td data-label="URL">{{ item.url }}</td>
         <td data-label="Visible">{{ 'Yes' if item.is_active else 'No' }}</td>

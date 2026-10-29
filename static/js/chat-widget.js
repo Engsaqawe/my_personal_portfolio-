@@ -5,6 +5,8 @@
   const close = document.getElementById("chatClose");
   const panel = document.getElementById("chatPanel");
   const messagesBox = document.getElementById("chatMessages");
+  const chatForm = document.getElementById("chatForm");
+  const chatStatus = document.getElementById("chatStatus");
   if (!widget || !toggle || !panel) return;
 
   const setOpen = (open) => {
@@ -25,9 +27,41 @@
   });
   if (window.location.hash === "#chat-widget") setOpen(true);
 
+  let refreshMessages = async () => {};
+  chatForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = chatForm.querySelector("button");
+    const input = chatForm.querySelector("textarea");
+    if (button) button.disabled = true;
+    if (chatStatus) chatStatus.textContent = "Sending…";
+    try {
+      const response = await fetch(chatForm.action, {
+        method: "POST",
+        body: new FormData(chatForm),
+        headers: { "X-Requested-With": "XMLHttpRequest", Accept: "application/json" },
+        credentials: "same-origin",
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        if (response.status === 401) {
+          window.location.assign(`/account/login?next=${encodeURIComponent("/#chat-widget")}`);
+          return;
+        }
+        throw new Error(result.message || "The message could not be sent.");
+      }
+      if (input) input.value = "";
+      if (chatStatus) chatStatus.textContent = "Sent. I’ll reply here.";
+      await refreshMessages();
+    } catch (error) {
+      if (chatStatus) chatStatus.textContent = error.message || "Could not send. Please try again.";
+    } finally {
+      if (button) button.disabled = false;
+    }
+  });
+
   if (messagesBox) {
     let previousCount = messagesBox.querySelectorAll(".site-chat__message").length;
-    const refreshMessages = async () => {
+    refreshMessages = async () => {
       try {
         const response = await fetch("/chat/messages", { credentials: "same-origin", headers: { Accept: "application/json" } });
         if (!response.ok) return;

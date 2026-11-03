@@ -881,35 +881,6 @@
     });
   }
 
-  /* -------------------- Portfolio Filters -------------------- */
-  const filterBtns = qsa(".chip--filter");
-  const projectCards = qsa(".project-card, .stack-card");
-
-  filterBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const filter = btn.getAttribute("data-filter") || "all";
-      filterBtns.forEach((b) => b.classList.toggle("chip--active", b === btn));
-
-      projectCards.forEach((card) => {
-        const category = card.getAttribute("data-category") || "";
-        const show = filter === "all" || category === filter;
-        card.classList.toggle("is-hidden", !show);
-        const stackSlot = card.closest(".stack-slot");
-        if (stackSlot) stackSlot.hidden = !show;
-
-        if (show && typeof gsap !== "undefined" && !prefersReducedMotion) {
-          gsap.fromTo(card, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" });
-        }
-      });
-
-      document.dispatchEvent(new Event("portfolio:filter"));
-
-      if (typeof ScrollTrigger !== "undefined") {
-        window.setTimeout(() => ScrollTrigger.refresh(), 120);
-      }
-    });
-  });
-
   /* -------------------- Certificate Modal -------------------- */
   const modal = qs("#cert-modal") || qs("#certificate-modal");
   const modalTitle = qs("#cert-modal-title") || qs("#certificate-modal-title");

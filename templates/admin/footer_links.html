@@ -2,7 +2,7 @@
 {% block title %}Footer Links{% endblock %}
 {% block content %}
 <header class="admin-header"><div><h1>Footer &amp; social links</h1><p>Manage footer groups and social icons here. Add social profiles under a section named “Social Links”; delete them from the list below. Affiliate links are managed separately.</p></div></header>
-<section class="admin-card admin-footer-projects"><div><h2>Selected projects</h2><p class="admin-muted">These project links appear in the footer alongside your footer links. Edit project details in Projects.</p></div><ul>{% for project in selected_projects %}<li><span>{{ project.title }}</span><a href="{{ url_for('admin.project_form', item_id=project.id) }}" class="admin-btn admin-btn--sm">Edit project</a></li>{% else %}<li class="admin-muted">No projects yet. Add one in Projects and it will appear here.</li>{% endfor %}</ul></section>
+<section class="admin-card admin-footer-projects"><div><h2>Other projects</h2><p class="admin-muted">These project links appear in the footer with your custom footer links. Manage titles, destinations, and visibility in Projects.</p></div><ul>{% for project in selected_projects %}<li><span>{{ project.title }}</span><a href="{{ url_for('admin.project_form', item_id=project.id) }}" class="admin-btn admin-btn--sm">Edit project</a></li>{% else %}<li class="admin-muted">No projects yet. Add one in Projects and it will appear here.</li>{% endfor %}</ul></section>
 <form class="admin-card admin-form" method="POST">
   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
   <h2>Add a footer link</h2>

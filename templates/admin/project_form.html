@@ -10,13 +10,6 @@
   <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
   <div class="admin-form__grid">
     <label>Title<input type="text" name="title" value="{{ project.title if project else '' }}" required /></label>
-    <label>Category
-      <select name="category">
-        {% for cat in ['saas', 'enterprise', 'experiments'] %}
-        <option value="{{ cat }}" {% if project and project.category == cat %}selected{% endif %}>{{ cat|title }}</option>
-        {% endfor %}
-      </select>
-    </label>
     <label>Sort order<input type="number" name="sort_order" value="{{ project.sort_order if project else 0 }}" /></label>
     <label class="admin-check"><input type="checkbox" name="featured" {% if not project or project.featured %}checked{% endif %} /> Show on site</label>
   </div>

@@ -11,7 +11,7 @@
     <label>Title<input type="text" name="title" value="{{ certificate.title if certificate else '' }}" required /></label>
     <label>Issuer<input type="text" name="issuer" value="{{ certificate.issuer if certificate else '' }}" /></label>
     <label>Year<input type="text" name="year" value="{{ certificate.year if certificate else '' }}" /></label>
-    <label>Display rank (1 appears first)<input type="number" name="sort_order" min="1" value="{{ certificate.sort_order if certificate else '' }}" /><small>Only the first three are shown initially.</small></label>
+    <label>Display rank (1 appears first)<input type="number" name="sort_order" min="1" value="{{ certificate.sort_order if certificate else '' }}" /><small>You can add more than three certificates. The homepage shows three first; visitors can select “See all” to view the rest.</small></label>
   </div>
   <label>Description<textarea name="description" rows="3">{{ certificate.description if certificate else '' }}</textarea></label>
   <div class="admin-form__grid">

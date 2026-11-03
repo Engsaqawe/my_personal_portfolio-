@@ -17,11 +17,12 @@
       <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="next" value="{{ next_url }}">
       {% if mode == 'register' %}<label>Full name<input name="name" autocomplete="name" maxlength="120" required></label>{% endif %}
       <label>Email address<input name="email" type="email" autocomplete="email" maxlength="180" required></label>
-      <label>Password<input name="password" type="password" autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}" minlength="{{ 10 if mode == 'register' else 1 }}" required>{% if mode == 'register' %}<small>Use at least 10 characters.</small>{% endif %}</label>
+      <label>Password<div class="account-password"><input id="accountPassword" name="password" type="password" autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}" minlength="{{ 10 if mode == 'register' else 1 }}" required><button class="account-password__toggle" type="button" data-password-toggle="accountPassword" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>{% if mode == 'register' %}<small>Use at least 10 characters.</small>{% else %}<a class="account-forgot" href="{{ url_for('account_forgot_password') }}">Forgot password?</a>{% endif %}</label>
       <button class="btn btn--primary" type="submit">{{ 'Create account' if mode == 'register' else 'Sign in' }} <span aria-hidden="true">→</span></button>
     </form>
     <p class="account-switch">{% if mode == 'register' %}Already registered? <a href="{{ url_for('account_login', next=next_url) }}">Sign in</a>{% else %}New here? <a href="{{ url_for('account_register', next=next_url) }}">Create an account</a>{% endif %}</p>
     <a class="account-back" href="{{ url_for('home') }}">← Back to portfolio</a>
   </main>
+  <script src="{{ url_for('static', filename='js/password-toggle.js') }}" defer></script>
 </body>
 </html>

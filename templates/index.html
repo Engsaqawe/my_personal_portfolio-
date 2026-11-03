@@ -39,9 +39,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=portfolio-story-1" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/project-stack.css') }}?v=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/project-stack.css') }}?v=15" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/services.css') }}?v=1" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/affiliates.css') }}?v=1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/affiliates.css') }}?v=2" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/home-selective-design.css') }}?v=1" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/site-features.css') }}?v=1" />
   <script type="application/ld+json">
@@ -364,42 +364,46 @@
     <!-- Projects -->
     {% set port_st = split_title(settings.get('portfolio_title', 'My|Projects')) %}
     <section class="section portfolio stack-portfolio" id="portfolio">
+      <span class="sp-blob sp-blob--1" aria-hidden="true"></span><span class="sp-blob sp-blob--2" aria-hidden="true"></span>
       <div class="section__header container stack-portfolio__header">
-        <h2 class="section__title split-title pop-up-text">{{ port_st[0] }} <span class="text-accent">{{ port_st[1] }}</span></h2>
-        <p class="eyebrow pop-up-text">{{ settings.get('portfolio_eyebrow', 'Portfolio') }}</p>
-        <p class="section__subtitle pop-up-text">{{ settings.get('portfolio_subtitle', 'Selected work, experiments, and systems in progress.') }}</p>
+        <h2 class="section__title split-title pop-up-text sp-reveal">{{ port_st[0] }} <span class="text-accent">{{ port_st[1] }}</span></h2>
+        <p class="eyebrow pop-up-text sp-reveal">{{ settings.get('portfolio_eyebrow', 'Portfolio') }}</p>
+        <p class="section__subtitle pop-up-text sp-reveal">{{ settings.get('portfolio_subtitle', 'Selected work, experiments, and systems in progress.') }}</p>
       </div>
       {% if projects %}
-      <div class="portfolio__controls container stack-portfolio__filters">
-        {% for f in portfolio_filters %}<button type="button" class="chip chip--filter{% if loop.first %} chip--active{% endif %}" data-filter="{{ f.value }}">{{ f.label }}</button>{% endfor %}
-      </div>
       <div class="stack-progress" aria-hidden="true"><span id="stackProgress"></span></div>
+      <div class="stack-counter" id="stackCounter" aria-hidden="true">
+        <div class="stack-counter__dots">{% for project in projects %}<i {% if loop.first %}class="is-active"{% endif %}></i>{% endfor %}</div>
+        <b id="stackCounterNumber">01</b><span>/ {{ '%02d'|format(projects|length) }}</span>
+      </div>
       {% endif %}
       <div class="stack-work" id="stackWork">
         {% for project in projects %}
         {% set project_image = project.image_url or '' %}
         {% set feature_list = (project.features or '').split('|') %}
         {% set tech_list_for_project = (project.tech_stack or '').split(',') %}
-        <div class="stack-slot" data-stack-slot>
-          <article class="stack-card stack-card--database" data-stack-card data-category="{{ project.category }}" data-visual="database">
+        <div class="stack-slot{% if loop.index > 3 %} stack-slot--extra{% endif %}" data-stack-slot style="--stack-index:{{ loop.index0 }}">
+            <article class="stack-card stack-card--database" data-stack-card data-visual="database" style="--stack-index:{{ loop.index0 }}">
             <div class="stack-card__panel">
               <div class="stack-card__picture">
-                {% if project_image %}<div class="stack-card__media">{% if project_image.startswith('http://') or project_image.startswith('https://') or project_image.startswith('/static/') %}<img src="{{ project_image }}" alt="{{ project.title }} project preview" loading="lazy">{% else %}<img src="{{ url_for('static', filename=project_image) }}" alt="{{ project.title }} project preview" loading="lazy">{% endif %}</div>{% else %}<div class="stack-card__media stack-card__media--placeholder" aria-hidden="true"><span>{{ project.title[:1]|upper }}</span></div>{% endif %}
-                <span class="stack-badge">{{ project.category or 'Project' }}</span>
+                {% if project_image %}<div class="stack-card__media">{% if project_image.startswith('http://') or project_image.startswith('https://') or project_image.startswith('/static/') %}<img src="{{ project_image }}" alt="{{ project.title }} project preview" loading="lazy">{% else %}<img src="{{ url_for('static', filename=project_image) }}" alt="{{ project.title }} project preview" loading="lazy">{% endif %}<span class="stack-card__shine" aria-hidden="true"></span></div>{% else %}<div class="stack-card__media stack-card__media--placeholder" aria-hidden="true"><span>{{ project.title[:1]|upper }}</span></div>{% endif %}
+                <span class="stack-index" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span>
               </div>
+              <button class="stack-image-resizer" type="button" role="slider" aria-label="Resize project image" aria-valuemin="0" aria-valuemax="70" aria-valuenow="40" aria-orientation="horizontal" data-pct="40" title="Drag to resize; double-click to reset" tabindex="0"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7-5 5 5 5M15 7l5 5-5 5"/></svg></button>
+              <div class="stack-resize-snaps" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
               <div class="stack-card__details">
                 <div class="stack-card__body">
                   <span class="stack-title-mask"><h3>{{ project.title }}</h3></span>
                   <span class="stack-title-mask"><p class="stack-lead">{{ project.description }}</p></span>
                   <ul class="stack-features">
-                    {% for feature in feature_list if feature.strip() %}<li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg>{{ feature.strip() }}</li>{% endfor %}
+                    {% for feature in feature_list if feature.strip() %}<li style="--i:{{ loop.index0 }}"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg>{{ feature.strip() }}</li>{% endfor %}
                   </ul>
-                  {% if project.challenges %}<p class="stack-copy"><b>Challenge:</b> {{ project.challenges }}</p>{% endif %}
-                  {% if project.solutions %}<p class="stack-copy"><b>Solution:</b> {{ project.solutions }}</p>{% endif %}
-                  <div class="stack-chips">{% for label in tech_list_for_project if label.strip() %}<span><i>{{ label.strip()[:2]|upper }}</i>{{ label.strip() }}</span>{% endfor %}</div>
+                  <div class="stack-chips">{% for label in tech_list_for_project if label.strip() %}<span style="--i:{{ loop.index0 }}"><i>{{ label.strip()[:2]|upper }}</i>{{ label.strip() }}</span>{% endfor %}</div>
                   <div class="stack-actions">
-                    {% if project.live_link %}<a class="stack-button stack-button--live" href="{{ project.live_link }}" target="_blank" rel="noopener noreferrer"><span>Live Demo</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>{% endif %}
-                    {% if project.source_link %}<a class="stack-button stack-button--github" href="{{ project.source_link }}" target="_blank" rel="noopener noreferrer"><span>GitHub</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></svg></a>{% endif %}
+                    {% if project.live_link %}<a class="stack-button stack-button--live" href="{{ project.live_link }}" target="_blank" rel="noopener noreferrer" aria-label="Live demo for {{ project.title }}" title="Live Demo"><span>Live Demo</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>{% endif %}
+                    {% if project.source_link %}<a class="stack-button stack-button--github" href="{{ project.source_link }}" target="_blank" rel="noopener noreferrer" aria-label="GitHub source for {{ project.title }}" title="GitHub"><span>GitHub</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></svg></a>{% endif %}
+                    {% if project.challenges %}<details class="stack-detail-disclosure"><summary aria-label="Show challenge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3v18M6 4h12l-2.5 4L18 12H6"/></svg><span>Challenge</span></summary><p>{{ project.challenges }}</p></details>{% endif %}
+                    {% if project.solutions %}<details class="stack-detail-disclosure"><summary aria-label="Show solution"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 22h4M8 14c-1.2-1-2-2.5-2-4.2a6 6 0 1 1 12 0c0 1.7-.8 3.2-2 4.2-.8.7-1 1.1-1 2h-6c0-.9-.2-1.3-1-2Z"/></svg><span>Solution</span></summary><p>{{ project.solutions }}</p></details>{% endif %}
                   </div>
                 </div>
               </div>
@@ -408,10 +412,11 @@
         </div>
         {% endfor %}
       </div>
-      {% if projects %}
-      <div class="stack-counter" id="stackCounter" aria-hidden="true">
-        <div class="stack-counter__dots">{% for project in projects %}<i {% if loop.first %}class="is-active"{% endif %}></i>{% endfor %}</div>
-        <b id="stackCounterNumber">01</b><span>/ {{ '%02d'|format(projects|length) }}</span>
+      {% if projects|length > 3 %}
+      <div class="stack-projects-toggle-wrap container">
+        <button type="button" class="btn btn--ghost btn--sm magnetic certificates__toggle stack-projects-toggle" id="seeAllStackProjects" aria-expanded="false">
+          <span>See all projects</span>
+        </button>
       </div>
       {% endif %}
     </section>
@@ -444,37 +449,96 @@
       </div>
     </section>
 
-    <!-- AFFILIATE RECOMMENDATIONS -->
-    {% if affiliate_links %}
-    {% set affiliate_title = split_title(settings.get('affiliate_title', 'Tools I|recommend')) %}
-    <section class="section affiliate-section" id="affiliates" aria-labelledby="affiliates-title">
+    {% if affiliate_partners['dynadot'] %}
+    <!-- DYNADOT DOMAIN SERVICES -->
+    <section class="domain-cta" id="affiliates" aria-labelledby="domain-services-title">
+      <div class="domain-cta__glow" aria-hidden="true"></div>
       <div class="container">
-        <header class="affiliate__header">
-          <h2 class="section__title" id="affiliates-title" data-reveal style="--i:1">{{ affiliate_title[0] }} <span class="text-accent">{{ affiliate_title[1] }}</span></h2>
-          <p class="eyebrow" data-reveal>{{ settings.get('affiliate_eyebrow', 'Affiliate links') }}</p>
-          <p class="section__subtitle" data-reveal style="--i:2">{{ settings.get('affiliate_subtitle', 'Services and tools you may find useful for your own website or project.') }}</p>
+        <div class="domain-cta__card">
+          <div class="domain-cta__content">
+            <span class="domain-cta__eyebrow"><i class="fa-solid fa-globe" aria-hidden="true"></i> DOMAIN SERVICES</span>
+            <h2 id="domain-services-title">Find Your <span>Perfect Domain</span></h2>
+            <p>{{ affiliate_partners['dynadot'].description or 'Give your business, portfolio, or project a professional online identity with the right domain name.' }}</p>
+            <div class="domain-extensions" aria-label="Available domain extensions"><span>.COM</span><span>.NET</span><span>.ORG</span><span>.CO</span><span>.IO</span></div>
+            <a href="{{ affiliate_partners['dynadot'].url }}" target="_blank" rel="nofollow sponsored noopener noreferrer" class="domain-cta__button">
+              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span>Search Available Domains</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </a>
+            <small class="domain-cta__note">Search domains through Dynadot</small>
+          </div>
+          <div class="domain-cta__visual" aria-hidden="true">
+            <div class="domain-orbit domain-orbit--1"></div><div class="domain-orbit domain-orbit--2"></div><div class="domain-orbit domain-orbit--3"></div>
+            <div class="domain-globe"><i class="fa-solid fa-globe"></i></div>
+            <div class="domain-floating domain-floating--1">.COM</div><div class="domain-floating domain-floating--2">.ORG</div><div class="domain-floating domain-floating--3">.IO</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if affiliate_partners['namecheap_domain'] or affiliate_partners['namecheap_hosting'] %}
+    <!-- NAMECHEAP AFFILIATE SERVICES -->
+    <section class="namecheap-cta" id="namecheap-services" aria-labelledby="namecheap-services-title">
+      <div class="namecheap-cta__glow" aria-hidden="true"></div>
+      <div class="container">
+        <header class="namecheap-cta__header">
+          <span class="namecheap-cta__eyebrow"><i class="fa-solid fa-bolt" aria-hidden="true"></i> WEB SERVICES</span>
+          <h2 id="namecheap-services-title">Build Your <span>Online Presence</span></h2>
+          <p>Get your domain and reliable hosting from Namecheap and take your website to the next level.</p>
         </header>
-        <aside class="affiliate__disclosure" role="note" data-reveal style="--i:3">
-          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
-          <div><strong>{{ settings.get('affiliate_disclosure_title', 'Affiliate disclosure') }}</strong><p>{{ settings.get('affiliate_disclosure', 'Some links may be affiliate links. I may receive a commission if you purchase through them.') }}</p></div>
-        </aside>
-        <ul class="affiliate__grid" role="list">
-        {% for item in affiliate_links %}
-        <li class="affiliate-item">
-          <article class="affiliate-card" data-reveal style="--i:{{ loop.index0 }}">
-            <div class="affiliate-card__thumb">
-              <span class="affiliate-card__tag">{{ settings.get('affiliate_tag_label', 'Affiliate link') }}</span>
-              {% if item.image_url %}{% if item.image_url.startswith('http://') or item.image_url.startswith('https://') or item.image_url.startswith('/') %}<img src="{{ item.image_url }}" alt="{{ item.label }} thumbnail" loading="lazy" referrerpolicy="no-referrer">{% else %}<img src="{{ url_for('static', filename=item.image_url) }}" alt="{{ item.label }} thumbnail" loading="lazy">{% endif %}{% else %}<span class="affiliate-card__mono" aria-hidden="true">{{ item.label[:1]|upper }}</span>{% endif %}
+        <div class="namecheap-grid">
+          {% if affiliate_partners['namecheap_domain'] %}
+          <article class="namecheap-card namecheap-card--domain">
+            <div class="namecheap-card__glow" aria-hidden="true"></div>
+            <div class="namecheap-card__content">
+              <span class="namecheap-card__eyebrow"><i class="fa-solid fa-globe" aria-hidden="true"></i> DOMAIN REGISTRATION</span>
+              <h3>Find Your <span>Perfect Domain</span></h3>
+              <p>{{ affiliate_partners['namecheap_domain'].description or 'Give your business, portfolio, or project a professional online identity with the right domain name.' }}</p>
+              <div class="namecheap-extensions"><span>.COM</span><span>.NET</span><span>.ORG</span><span>.CO</span><span>.IO</span></div>
+              <a href="{{ affiliate_partners['namecheap_domain'].url }}" target="_blank" rel="nofollow sponsored noopener noreferrer" class="namecheap-button namecheap-button--domain">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span>Search Available Domains</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              </a>
+              <small class="namecheap-card__note">Search domains through Namecheap</small>
             </div>
-            <div class="affiliate-card__body">
-              <h3 class="affiliate-card__title">{{ item.label }}</h3>
-              <p class="affiliate-card__text">{{ item.description or settings.get('affiliate_description', 'A service worth exploring for your next project.') }}</p>
-              <a class="affiliate-card__cta" href="{{ item.url }}" target="_blank" rel="sponsored noopener noreferrer" aria-label="{{ settings.get('affiliate_button_label', 'Visit website') }}: {{ item.label }} (opens in a new tab)"><span>{{ settings.get('affiliate_button_label', 'Visit website') }}</span><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+            <div class="namecheap-card__visual" aria-hidden="true">
+              <div class="nc-orbit nc-orbit--1"></div><div class="nc-orbit nc-orbit--2"></div><div class="nc-orbit nc-orbit--3"></div>
+              <div class="nc-globe"><i class="fa-solid fa-globe"></i></div>
+              <div class="nc-floating nc-floating--1">.COM</div><div class="nc-floating nc-floating--2">.ORG</div><div class="nc-floating nc-floating--3">.IO</div>
             </div>
           </article>
-        </li>
-        {% endfor %}
-        </ul>
+          {% endif %}
+          {% if affiliate_partners['namecheap_hosting'] %}
+          <article class="namecheap-card namecheap-card--hosting">
+            <div class="namecheap-card__glow" aria-hidden="true"></div>
+            <div class="namecheap-card__content">
+              <span class="namecheap-card__eyebrow"><i class="fa-solid fa-server" aria-hidden="true"></i> SHARED HOSTING</span>
+              <h3>Reliable Hosting <span>For Your Website</span></h3>
+              <p>{{ affiliate_partners['namecheap_hosting'].description or 'Fast, affordable shared hosting for websites, portfolios, blogs, businesses, and online projects.' }}</p>
+              <div class="hosting-features" aria-label="Hosting features">
+                <div><i class="fa-solid fa-bolt" aria-hidden="true"></i><span>Fast<br>Performance</span></div>
+                <div><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><span>Free<br>SSL</span></div>
+                <div><i class="fa-solid fa-cloud" aria-hidden="true"></i><span>Reliable<br>Hosting</span></div>
+                <div><i class="fa-solid fa-headset" aria-hidden="true"></i><span>24/7<br>Support</span></div>
+              </div>
+              <a href="{{ affiliate_partners['namecheap_hosting'].url }}" target="_blank" rel="nofollow sponsored noopener noreferrer" class="namecheap-button namecheap-button--hosting">
+                <i class="fa-solid fa-server" aria-hidden="true"></i><span>Get Started with Shared Hosting</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+              </a>
+              <small class="namecheap-card__note">Explore shared hosting through Namecheap</small>
+            </div>
+            <div class="namecheap-card__visual" aria-hidden="true">
+              <div class="hosting-orbit hosting-orbit--1"></div><div class="hosting-orbit hosting-orbit--2"></div>
+              <div class="hosting-server"><div class="server-light"></div>
+                <div class="server-row"><span></span><span></span><span></span></div><div class="server-row"><span></span><span></span><span></span></div>
+                <div class="server-row"><span></span><span></span><span></span></div><div class="server-row"><span></span><span></span><span></span></div>
+              </div>
+              <div class="hosting-floating hosting-floating--1"><i class="fa-solid fa-lock"></i></div><div class="hosting-floating hosting-floating--2"><i class="fa-solid fa-cloud"></i></div>
+            </div>
+          </article>
+          {% endif %}
+        </div>
+        <div class="namecheap-disclosure" role="note">
+          <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+          <span>Some links on this website are affiliate links. I may earn a commission if you make a purchase through them, at no additional cost to you.</span>
+        </div>
       </div>
     </section>
     {% endif %}
@@ -666,7 +730,7 @@
       </div>
       {% if footer_link_groups or footer_projects %}
       <div class="footer__columns">
-        {% if footer_projects %}<div class="footer__column"><h3>{{ settings.get('footer_projects_heading', 'Selected projects') }}</h3><ul>{% for project in footer_projects %}<li><a href="{{ project.live_link or '#portfolio' }}" {% if project.live_link %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ project.title }}</a></li>{% endfor %}</ul></div>{% endif %}
+        {% if footer_projects %}<div class="footer__column"><h3>{{ 'Other projects' if settings.get('footer_projects_heading') == 'Selected projects' else settings.get('footer_projects_heading', 'Other projects') }}</h3><ul>{% for project in footer_projects %}<li><a href="{{ project.live_link or '#portfolio' }}" {% if project.live_link %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ project.title }}</a></li>{% endfor %}</ul></div>{% endif %}
         {% for section_title, group in footer_link_groups %}
         <div class="footer__column">
           <h3>{{ section_title }}</h3>
@@ -743,9 +807,8 @@
   </div>
 
   <script src="{{ url_for('static', filename='js/main.js') }}?v=portfolio-story-1" defer></script>
-  <script src="{{ url_for('static', filename='js/project-stack.js') }}?v=1" defer></script>
+  <script src="{{ url_for('static', filename='js/project-stack.js') }}?v=12" defer></script>
   <script src="{{ url_for('static', filename='js/services.js') }}?v=1" defer></script>
-  <script src="{{ url_for('static', filename='js/affiliates.js') }}?v=1" defer></script>
   <script src="{{ url_for('static', filename='js/chat-widget.js') }}?v=1" defer></script>
 </body>
 

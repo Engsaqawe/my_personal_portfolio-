@@ -32,4 +32,17 @@
 
   <button type="submit" class="admin-btn admin-btn--primary" style="margin-top:1rem">Save all settings</button>
 </form>
+<section class="admin-card admin-form" id="change-admin-password">
+  <div><h2>Change admin password</h2><p class="admin-muted">Confirm your current password, then choose a new one with at least 12 characters.</p></div>
+  <form method="POST" action="{{ url_for('admin.change_admin_password') }}">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <div class="admin-form__grid">
+      <label>Current password<div class="admin-password-field"><input id="adminCurrentPassword" type="password" name="current_password" autocomplete="current-password" required><button type="button" data-password-toggle="adminCurrentPassword" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></label>
+      <label>New password<div class="admin-password-field"><input id="adminNewPassword" type="password" name="new_password" minlength="12" maxlength="256" autocomplete="new-password" required><button type="button" data-password-toggle="adminNewPassword" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></label>
+      <label>Confirm new password<div class="admin-password-field"><input id="adminConfirmPassword" type="password" name="confirm_password" minlength="12" maxlength="256" autocomplete="new-password" required><button type="button" data-password-toggle="adminConfirmPassword" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></label>
+    </div>
+    <button type="submit" class="admin-btn admin-btn--primary" style="margin-top:1rem">Update admin password</button>
+  </form>
+</section>
+<script src="{{ url_for('static', filename='js/password-toggle.js') }}" defer></script>
 {% endblock %}

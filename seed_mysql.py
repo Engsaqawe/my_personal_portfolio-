@@ -23,6 +23,15 @@ CREATE TABLE IF NOT EXISTS site_users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS account_password_resets (
+    user_id INT PRIMARY KEY,
+    code_hash CHAR(64) NOT NULL,
+    expires_at BIGINT UNSIGNED NOT NULL,
+    created_at BIGINT UNSIGNED NOT NULL,
+    attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    INDEX password_reset_expiry (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS site_chats (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -555,12 +564,44 @@ def seed():
                     GALLERY,
                 )
 
-            cur.execute("SELECT COUNT(*) AS c FROM footer_links WHERE LOWER(section_title) = 'affiliate links'")
-            if cur.fetchone()["c"] == 0:
+            # Import the domain/hosting recommendations from the supplied portfolio mockup once.
+            # Later admin edits and deletions remain authoritative.
+            cur.execute("SELECT setting_key FROM site_settings WHERE setting_key=%s", ("affiliate_partners_migrated_v2",))
+            if not cur.fetchone():
+                partners = [
+                    ("Dynadot Domain Search", "https://www.jdoqocy.com/click-101882491-12527387",
+                     "Give your business, portfolio, or project a professional online identity with the right domain name.", 0),
+                    ("Namecheap Domain Registration", "https://www.kqzyfj.com/click-101882491-15082755",
+                     "Give your business, portfolio, or project a professional online identity with the right domain name.", 1),
+                    ("Namecheap Hosting", "https://www.dpbolvw.net/click-101882491-15084154",
+                     "Fast, affordable shared hosting for websites, portfolios, blogs, businesses, and online projects.", 2),
+                ]
+                for label, destination, description, order in partners:
+                    cur.execute(
+                        """SELECT id FROM footer_links
+                           WHERE LOWER(TRIM(section_title)) IN ('affiliate links','affiliates')
+                             AND (LOWER(TRIM(label))=LOWER(%s) OR url=%s)
+                           ORDER BY id LIMIT 1""",
+                        (label, destination),
+                    )
+                    existing_partner = cur.fetchone()
+                    if existing_partner:
+                        cur.execute(
+                            """UPDATE footer_links SET section_title='Affiliate links',label=%s,url=%s,
+                               description=%s,sort_order=%s,section_order=0,is_active=1
+                               WHERE id=%s""",
+                            (label, destination, description, order, existing_partner["id"]),
+                        )
+                    else:
+                        cur.execute(
+                            """INSERT INTO footer_links
+                               (section_title,label,url,description,sort_order,section_order,is_active)
+                               VALUES ('Affiliate links',%s,%s,%s,%s,0,1)""",
+                            (label, destination, description, order),
+                        )
                 cur.execute(
-                    """INSERT INTO footer_links (section_title, label, url, sort_order, section_order, is_active)
-                       VALUES ('Affiliate links', %s, %s, 0, 0, 1)""",
-                    ("Namecheap Hosting", "https://www.namecheap.com/hosting/"),
+                    """INSERT INTO site_settings (setting_key,setting_value,setting_group)
+                       VALUES ('affiliate_partners_migrated_v2','1','affiliates')"""
                 )
 
             # Seed any missing site_settings keys (never overwrite existing)
@@ -577,6 +618,22 @@ def seed():
                 """UPDATE site_settings SET setting_value=%s, setting_group='affiliates'
                    WHERE setting_key='affiliate_title' AND setting_value='Tools I Recommend'""",
                 ("Tools I|recommend",),
+            )
+            cur.execute(
+                """UPDATE site_settings SET setting_value=%s
+                   WHERE setting_key='affiliate_title' AND setting_value='Tools I|recommend'""",
+                ("Build your|online presence",),
+            )
+            cur.execute(
+                """UPDATE site_settings SET setting_value=%s
+                   WHERE setting_key='affiliate_eyebrow' AND setting_value='Affiliate links'""",
+                ("DOMAINS & HOSTING",),
+            )
+            cur.execute(
+                """UPDATE site_settings SET setting_value=%s
+                   WHERE setting_key='affiliate_subtitle'
+                     AND setting_value='Services and tools you may find useful for your own website or project.'""",
+                ("Find a memorable domain and reliable hosting for your website, portfolio, or next project.",),
             )
 
             # Prefer built-in Academy Panel over old external default

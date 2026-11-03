@@ -9,14 +9,13 @@
 <div class="admin-card admin-table-wrap">
   <table class="admin-table admin-table--responsive">
     <thead>
-      <tr><th>Preview</th><th>Title</th><th>Category</th><th>Featured</th><th>Actions</th></tr>
+      <tr><th>Preview</th><th>Title</th><th>Featured</th><th>Actions</th></tr>
     </thead>
     <tbody>
       {% for p in projects %}
       <tr>
         <td data-label="Preview"><img class="admin-thumb" src="{{ url_for('static', filename=p.image_url) }}" alt="" /></td>
         <td data-label="Title"><strong>{{ p.title }}</strong></td>
-        <td data-label="Category">{{ p.category }}</td>
         <td data-label="Featured">{% if p.featured %}Yes{% else %}No{% endif %}</td>
         <td data-label="Actions" class="admin-table__actions">
           <a href="{{ url_for('admin.project_form', item_id=p.id) }}" class="admin-btn admin-btn--sm">Edit</a>
@@ -27,7 +26,7 @@
         </td>
       </tr>
       {% else %}
-      <tr class="admin-table__empty"><td colspan="5" class="admin-muted">No projects yet.</td></tr>
+      <tr class="admin-table__empty"><td colspan="4" class="admin-muted">No projects yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>

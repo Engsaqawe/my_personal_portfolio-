@@ -5,10 +5,11 @@ import secrets
 import hashlib
 import smtplib
 import ssl
+import time
 from datetime import datetime, timedelta
 from email.message import EmailMessage
 from email.utils import formataddr
-from hmac import compare_digest
+from hmac import compare_digest, new as hmac_new
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo
 from flask import Flask, render_template, request, flash, redirect, url_for, abort, Response, jsonify, session, g
@@ -294,7 +295,7 @@ def home():
     settings = get_site_settings()
     projects = query_all("SELECT * FROM projects WHERE featured = 1 ORDER BY sort_order ASC, id ASC")
     services = query_all("SELECT * FROM services WHERE is_active = 1 ORDER BY sort_order ASC, id ASC")
-    footer_projects = query_all("SELECT title, live_link FROM projects ORDER BY sort_order ASC, id ASC LIMIT 5")
+    footer_projects = query_all("SELECT title, live_link FROM projects WHERE featured = 0 ORDER BY sort_order ASC, id ASC LIMIT 5")
     certificates = query_all("SELECT * FROM certificates ORDER BY sort_order ASC, id ASC")
     courses = query_all(
         """SELECT c.*, (SELECT COUNT(*) FROM academy_lessons l WHERE l.course_id=c.id) AS lesson_count
@@ -315,6 +316,17 @@ def home():
         if destination:
             affiliate_urls.add(destination)
         affiliate_links.append(item)
+    partner_labels = {
+        "dynadot": {"dynadot domain search"},
+        "namecheap_domain": {"namecheap domain registration"},
+        "namecheap_hosting": {"namecheap hosting"},
+    }
+    affiliate_partners = {key: None for key in partner_labels}
+    for item in affiliate_links:
+        label_key = " ".join((item.get("label") or "").casefold().split())
+        for partner_key, labels in partner_labels.items():
+            if label_key in labels and affiliate_partners[partner_key] is None:
+                affiliate_partners[partner_key] = item
     footer_link_groups = {}
     social_group_names = {"social", "social links"}
     for item in footer_links:
@@ -376,6 +388,7 @@ def home():
         projects=projects,
         services=services,
         affiliate_links=affiliate_links,
+        affiliate_partners=affiliate_partners,
         footer_projects=footer_projects,
         certificates=certificates,
         courses=courses,
@@ -453,6 +466,105 @@ def account_login():
             session["site_user_id"], session["site_user_name"], session["site_user_email"] = user["id"], user["name"], user["email"]
             return redirect(next_url)
     return render_template("account_auth.html", mode="login", next_url=next_url)
+
+
+def password_reset_code_hash(user_id, code):
+    return hmac_new(app.secret_key.encode("utf-8"), f"{user_id}:{code}".encode("utf-8"), hashlib.sha256).hexdigest()
+
+
+def send_password_reset_email(user, code):
+    app_password = (os.getenv("app_password") or os.getenv("GMAIL_APP_PASSWORD") or "").replace(" ", "")
+    if not app_password:
+        app.logger.warning("Password reset email skipped: Gmail app password is not configured.")
+        return False
+    sender_email = (os.getenv("GMAIL_ADDRESS") or os.getenv("SMTP_USERNAME") or NOTIFICATION_EMAIL).strip()
+    sender_name = " ".join((os.getenv("app_name") or "ENGSAQAWE Portfolio").split())[:100] or "ENGSAQAWE Portfolio"
+    email_message = EmailMessage()
+    email_message["Subject"] = "Your ENGSAQAWE password verification code"
+    email_message["From"] = formataddr((sender_name, sender_email))
+    email_message["To"] = user["email"]
+    email_message.set_content(
+        f"Hello {user['name']},\n\nYour password reset verification code is: {code}\n\n"
+        "The code expires in 15 minutes and can be tried up to five times. "
+        "If you did not request this, you can ignore this email."
+    )
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=8, context=ssl.create_default_context()) as smtp:
+            smtp.login(sender_email, app_password)
+            smtp.send_message(email_message)
+        return True
+    except (OSError, smtplib.SMTPException) as exc:
+        app.logger.warning("Password reset email failed (%s).", type(exc).__name__)
+        return False
+
+
+@app.route("/account/forgot-password", methods=["GET", "POST"])
+def account_forgot_password():
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+        user = query_one("SELECT id,name,email,password_hash FROM site_users WHERE email=%s AND is_active=1", (email,)) if email else None
+        if user:
+            now = int(time.time())
+            prior = query_one("SELECT created_at FROM account_password_resets WHERE user_id=%s", (user["id"],))
+            if not prior or now - int(prior["created_at"]) >= 60:
+                code = f"{secrets.randbelow(1_000_000):06d}"
+                execute(
+                    """INSERT INTO account_password_resets (user_id,code_hash,expires_at,created_at,attempts)
+                       VALUES (%s,%s,%s,%s,0) ON DUPLICATE KEY UPDATE
+                       code_hash=VALUES(code_hash),expires_at=VALUES(expires_at),created_at=VALUES(created_at),attempts=0""",
+                    (user["id"], password_reset_code_hash(user["id"], code), now + 900, now),
+                )
+                send_password_reset_email(user, code)
+        flash("If an active account uses that email, a verification code has been sent.", "success")
+        return render_template("account_verify_code.html", email=email)
+    return render_template("account_forgot_password.html")
+
+
+@app.route("/account/verify-code", methods=["POST"])
+def account_verify_code():
+    email = (request.form.get("email") or "").strip().lower()
+    code = (request.form.get("code") or "").strip()
+    password = request.form.get("password") or ""
+    confirmation = request.form.get("confirm_password") or ""
+    generic_error = "The code is invalid or expired, or the passwords do not match. Request a new code and try again."
+    if len(password) < 10 or len(password) > 256 or password != confirmation:
+        flash(generic_error, "error")
+        return render_template("account_verify_code.html", email=email)
+
+    user = query_one("SELECT id FROM site_users WHERE email=%s AND is_active=1", (email,)) if email else None
+    if not user or len(code) != 6 or not code.isdigit():
+        flash(generic_error, "error")
+        return render_template("account_verify_code.html", email=email)
+
+    conn = get_db()
+    valid = False
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT code_hash,expires_at,attempts FROM account_password_resets WHERE user_id=%s FOR UPDATE", (user["id"],))
+            reset = cur.fetchone()
+            now = int(time.time())
+            if reset and int(reset["expires_at"]) > now and int(reset["attempts"]) < 5:
+                expected = password_reset_code_hash(user["id"], code)
+                if compare_digest(reset["code_hash"], expected):
+                    cur.execute("UPDATE site_users SET password_hash=%s WHERE id=%s", (generate_password_hash(password), user["id"]))
+                    cur.execute("DELETE FROM account_password_resets WHERE user_id=%s", (user["id"],))
+                    valid = True
+                else:
+                    cur.execute("UPDATE account_password_resets SET attempts=attempts+1 WHERE user_id=%s", (user["id"],))
+            elif reset:
+                cur.execute("DELETE FROM account_password_resets WHERE user_id=%s", (user["id"],))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+    if valid:
+        flash("Your password was changed. You can sign in now.", "success")
+        return redirect(url_for("account_login"))
+    flash(generic_error, "error")
+    return render_template("account_verify_code.html", email=email)
 
 
 @app.route("/account/logout", methods=["POST"])

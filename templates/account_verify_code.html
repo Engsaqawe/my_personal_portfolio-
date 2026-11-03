@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify your email · ENGSAQAWE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/account.css') }}">
+</head>
+<body class="account-page">
+  <main class="account-card glass">
+    <a class="account-brand" href="{{ url_for('home') }}">ENGSAQAWE <span>Portfolio</span></a>
+    <p class="eyebrow">ACCOUNT RECOVERY</p>
+    <h1>Enter your verification code</h1>
+    <p class="account-intro">If that email belongs to an active account, a six-digit code was sent. The code expires in 15 minutes.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<div class="flash flash--{{ category }}" role="status">{{ message }}</div>{% endfor %}{% endwith %}
+    <form method="post" action="{{ url_for('account_verify_code') }}" class="account-form">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="email" value="{{ email }}">
+      <label>Six-digit code<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required></label>
+      <label>New password<div class="account-password"><input id="resetPassword" name="password" type="password" autocomplete="new-password" minlength="10" maxlength="256" required><button class="account-password__toggle" type="button" data-password-toggle="resetPassword" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div><small>Use at least 10 characters.</small></label>
+      <label>Confirm new password<div class="account-password"><input id="confirmPassword" name="confirm_password" type="password" autocomplete="new-password" minlength="10" maxlength="256" required><button class="account-password__toggle" type="button" data-password-toggle="confirmPassword" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></label>
+      <button class="btn btn--primary" type="submit">Verify code and reset password <span aria-hidden="true">→</span></button>
+    </form>
+    <a class="account-back" href="{{ url_for('account_forgot_password') }}">← Request another code</a>
+  </main>
+  <script src="{{ url_for('static', filename='js/password-toggle.js') }}" defer></script>
+</body>
+</html>

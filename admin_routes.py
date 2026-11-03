@@ -6,7 +6,8 @@ from datetime import datetime
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
-from auth import admin_required, login_admin, get_admin_by_id
+from auth import admin_required, login_admin, get_admin_by_id, hash_password
+from werkzeug.security import check_password_hash
 from db_helpers import query_all, query_one, execute, execute_returning_id
 from database import get_db
 from uploads import save_upload
@@ -137,6 +138,30 @@ def site_settings():
     return render_template("admin/settings_form.html", settings=settings, groups=groups)
 
 
+@admin_bp.route("/settings/change-password", methods=["POST"])
+@admin_required
+def change_admin_password():
+    current_password = request.form.get("current_password") or ""
+    new_password = request.form.get("new_password") or ""
+    confirmation = request.form.get("confirm_password") or ""
+    admin = query_one("SELECT id,password_hash FROM admins WHERE id=%s AND is_active=1", (session["admin_id"],))
+    if not admin or not check_password_hash(admin["password_hash"], current_password):
+        flash("Current password is incorrect.", "error")
+    elif len(new_password) < 12 or len(new_password) > 256:
+        flash("Choose a new password with at least 12 characters.", "error")
+    elif new_password != confirmation:
+        flash("The new passwords do not match.", "error")
+    elif check_password_hash(admin["password_hash"], new_password):
+        flash("Choose a password different from your current one.", "error")
+    else:
+        execute("UPDATE admins SET password_hash=%s WHERE id=%s", (hash_password(new_password), admin["id"]))
+        session.clear()
+        session["admin_id"] = admin["id"]
+        session["admin_username"] = (get_admin_by_id(admin["id"]) or {}).get("username", "")
+        flash("Admin password changed. Your session has been refreshed.", "success")
+    return redirect(url_for("admin.site_settings") + "#change-admin-password")
+
+
 # ---------- Projects ----------
 @admin_bp.route("/projects")
 @admin_required
@@ -164,7 +189,8 @@ def project_form(item_id=None):
             "challenges": (request.form.get("challenges") or "").strip(),
             "solutions": (request.form.get("solutions") or "").strip(),
             "tech_stack": (request.form.get("tech_stack") or "").strip(),
-            "category": (request.form.get("category") or "saas").strip(),
+            # Keep the legacy database column empty now that project categories are removed.
+            "category": "",
             "live_link": (request.form.get("live_link") or "").strip(),
             "source_link": (request.form.get("source_link") or "").strip(),
             "sort_order": int(request.form.get("sort_order") or 0),
@@ -846,7 +872,7 @@ def footer_links():
             flash("Footer link added.", "success")
             return redirect(url_for("admin.footer_links"))
     links = query_all("SELECT * FROM footer_links WHERE LOWER(TRIM(section_title)) NOT IN ('affiliate links','affiliates','selected projects') ORDER BY section_order, sort_order, id")
-    selected_projects = query_all("SELECT id,title,live_link FROM projects ORDER BY sort_order,id LIMIT 5")
+    selected_projects = query_all("SELECT id,title,live_link FROM projects WHERE featured=0 ORDER BY sort_order,id LIMIT 5")
     return render_template("admin/footer_links.html", links=links, selected_projects=selected_projects)
 
 

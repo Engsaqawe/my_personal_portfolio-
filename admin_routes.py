@@ -915,3 +915,50 @@ def footer_link_edit(item_id):
             flash("Footer link updated.", "success")
             return redirect(url_for("admin.footer_links"))
     return render_template("admin/footer_link_form.html", item=item)
+
+
+# ---------- Campaign Popup Settings ----------
+@admin_bp.route("/campaign-popup", methods=["GET", "POST"])
+@admin_required
+def campaign_popup():
+    from site_settings import get_site_settings
+
+    if request.method == "POST":
+        enabled = "1" if request.form.get("campaign_enabled") else "0"
+        end_date = (request.form.get("campaign_end_date") or "").strip()
+        try:
+            raw_hours = int(request.form.get("campaign_hide_hours") or 24)
+            hide_hours = str(max(0, min(8760, raw_hours)))
+        except ValueError:
+            hide_hours = "24"
+
+        if end_date:
+            try:
+                datetime.strptime(end_date, "%Y-%m-%d")
+            except ValueError:
+                flash("Enter the election end date in YYYY-MM-DD format.", "error")
+                settings = get_site_settings()
+                return render_template("admin/campaign_popup.html", settings=settings)
+
+        for key, val in (
+            ("campaign_enabled", enabled),
+            ("campaign_end_date", end_date),
+            ("campaign_hide_hours", hide_hours),
+        ):
+            existing = query_one("SELECT setting_key FROM site_settings WHERE setting_key = %s", (key,))
+            if existing:
+                execute(
+                    "UPDATE site_settings SET setting_value=%s, setting_group='campaign' WHERE setting_key=%s",
+                    (val, key),
+                )
+            else:
+                execute(
+                    "INSERT INTO site_settings (setting_key, setting_value, setting_group) VALUES (%s, %s, 'campaign')",
+                    (key, val),
+                )
+
+        flash("Campaign popup settings saved successfully.", "success")
+        return redirect(url_for("admin.campaign_popup"))
+
+    settings = get_site_settings()
+    return render_template("admin/campaign_popup.html", settings=settings)

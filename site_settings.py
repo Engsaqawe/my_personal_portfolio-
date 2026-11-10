@@ -19,9 +19,10 @@ SETTING_GROUPS = [
 ]
 
 SETTINGS_SCHEMA = [
-    ("meta_description", "seo", "Meta description", "ENGSAQAWE — websites, apps, and systems built by Nor Ali Saqawe.", "textarea"),
+    ("meta_description", "seo", "Meta description", "Nuur Cali Saqawe (ENGSAQAWE) is a full-stack web developer and virtual assistant offering web development, digital systems, Somali-English translation, transcription, and online teaching.", "textarea"),
+    ("seo_intro", "seo", "Search introduction shown on the homepage", "I’m a full-stack web developer and virtual assistant offering web and system development, Somali-English translation, transcription, and online teaching.", "textarea"),
     ("site_url", "seo", "Site URL", "https://engsaqawe.com", "text"),
-    ("job_title", "seo", "Job title (SEO)", "Software Engineer", "text"),
+    ("job_title", "seo", "Job title (SEO)", "Full-Stack Web Developer and Virtual Assistant", "text"),
     ("og_image_path", "seo", "OG image path (under static/)", "images/pictures/me.png", "text"),
     ("typewriter_prefix", "hero", "Typewriter prefix", "I build ", "text"),
     ("typewriter_phrases", "hero", "Typewriter phrases (one per line)", "websites.\nweb apps.\nclean UI.\nMySQL systems.\ndigital tools.", "textarea"),

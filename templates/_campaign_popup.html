@@ -1,0 +1,106 @@
+{# Campaign popup — styled exactly like campaign.html, wide on desktop, responsive on mobile. #}
+{% if settings.get('campaign_enabled') == '1' and settings.get('campaign_end_date') %}
+<div id="cpop-overlay" class="cpop-overlay" style="display:none">
+  <div class="cpop-dialog" role="dialog" aria-modal="true" aria-label="Campaign — Eng. Nur Ali Saqawe" tabindex="-1">
+
+    {# Top Sticky Navigation Bar #}
+    <div class="cpop-bar">
+      <div class="cpop-bar__left">
+        <span class="cpop-bar__brand">
+          <i class="fa-solid fa-graduation-cap" style="color:#f5c400"></i>
+          <span>Hormuud University &middot; CS &amp; IT</span>
+        </span>
+      </div>
+      <div class="cpop-bar__right">
+        {# Language toggle #}
+        <div class="cpop-lang" role="group" aria-label="Language / Luuqad">
+          <button type="button" data-lang="so" aria-pressed="true">SO</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+        {# Quick close X button #}
+        <button type="button" class="cpop-x-btn" aria-label="Close popup">&times;</button>
+      </div>
+    </div>
+
+    {# Hero Section (Wide 2-column on desktop) #}
+    <header class="cpop-hero">
+      <div class="cpop-wrap">
+        <div class="cpop-hero__grid">
+          <div>
+            <small data-so="Musharaxa Guddoomiyaha Ardayda ee Kulliyadda Computer Science &amp; IT" data-en="Candidate for Student Leader of the Faculty of Computer Science &amp; IT">Musharaxa Guddoomiyaha Ardayda ee Kulliyadda Computer Science &amp; IT</small>
+            <h1>Eng. NUR ALI <span>SAQAWE</span></h1>
+            <p class="cpop-tag" data-so="<b>Hufnaan iyo horumar muuqda,</b> hogaan iyo himilo toosan." data-en="<b>Care and visible progress,</b> guidance and a clear goal."><b>Hufnaan iyo horumar muuqda,</b> hogaan iyo himilo toosan.</p>
+            <a class="cpop-hero__cta" href="#cpop-ku-dooro" data-so="Eeg qorshahayga" data-en="See my plan">Eeg qorshahayga</a>
+          </div>
+          <div>
+            <img class="cpop-hero__poster" src="{{ url_for('static', filename='images/campaign-poster.png') }}" alt="Poster-ka ololaha Eng. Nur Ali Saqawe, Engsaqawe">
+          </div>
+        </div>
+      </div>
+    </header>
+
+    {# Three Words Stripe #}
+    <div class="cpop-three">
+      <div class="cpop-wrap">
+        <ul>
+          <li>&#10003; <span data-so="Midnimo" data-en="Unity">Midnimo</span></li>
+          <li>&#10003; <span data-so="Masuuliyad" data-en="Responsibility">Masuuliyad</span></li>
+          <li>&#10003; <span data-so="Mashaariic" data-en="Projects">Mashaariic</span></li>
+        </ul>
+      </div>
+    </div>
+
+    {# 8 Promises Section #}
+    <section class="cpop-section" id="cpop-ku-dooro">
+      <div class="cpop-wrap">
+        <h2 data-so="Sideed ballan oo aan ku siinayo" data-en="Eight promises I give you">Sideed ballan oo aan ku siinayo</h2>
+        <p class="cpop-lead" data-so="Waa sideed shay oo ardayga kasta u wanaagsan. Mid kasta waxaan ku raacinayaa shaqo, ma aha hadal oo kaliya." data-en="Eight things that are good for every student. I will follow each one with action, not only words.">Waa sideed shay oo ardayga kasta u wanaagsan. Mid kasta waxaan ku raacinayaa shaqo, ma aha hadal oo kaliya.</p>
+        <div class="cpop-points" id="cpop-points"></div>
+      </div>
+    </section>
+
+    {# SUCCESS Letter Trail Section #}
+    <section class="cpop-section cpop-trail" id="cpop-guul">
+      <div class="cpop-wrap">
+        <h2 data-so="Raac falaarta. Akhri xarfaha." data-en="Follow the arrow. Read the letters.">Raac falaarta. Akhri xarfaha.</h2>
+        <p class="cpop-lead" data-so="Haddii aad sticker-yadayada ku aragtay jaamacadda, waa kuwan jawaabtooda. Xarafka koowaad ee mid kasta isu geey." data-en="If you saw my stickers on campus, here are their answers. Put the first letter of each Somali sticker together and you get SUCCESS.">Haddii aad sticker-yadayada ku aragtay jaamacadda, waa kuwan jawaabtooda. Xarafka koowaad ee mid kasta isu geey.</p>
+
+        <div class="cpop-letters" id="cpop-letters" role="group" aria-label="SUCCESS"></div>
+
+        <div class="cpop-stage" aria-live="polite">
+          <div class="cpop-sticker">
+            <div class="cpop-sticker__n" id="cpop-sn"></div>
+            <div class="cpop-sticker__q" id="cpop-sq"></div>
+            <span class="cpop-sticker__arrow" id="cpop-sa"></span>
+          </div>
+          <div class="cpop-reveal">
+            <span class="cpop-reveal__lab" id="cpop-rl"></span>
+            <span class="cpop-reveal__a" id="cpop-ra"></span>
+            <span class="cpop-reveal__p" id="cpop-rp"></span>
+            <button type="button" class="cpop-reveal__link" id="cpop-rk"></button>
+          </div>
+        </div>
+        <button type="button" class="cpop-next" id="cpop-next"></button>
+
+        <p class="cpop-answer" data-so="<span>SUCCESS</span> waa wadajir. Wadajir baan wax u barannaa, wax u dhisnaa, oo u koraynaa." data-en="<span>SUCCESS</span> is togetherness. Together we learn, together we build, and together we grow."><span>SUCCESS</span> waa wadajir. Wadajir baan wax u barannaa, wax u dhisnaa, oo u koraynaa.</p>
+      </div>
+    </section>
+
+    {# Motto Section #}
+    <section class="cpop-motto">
+      <div class="cpop-wrap">
+        <p class="cpop-motto__big">Together We <em>Learn</em>, Together We <em>Build</em>, Together We <em>Grow</em>.</p>
+        <p class="cpop-motto__so">Wadajir baan wax u barannaa, wax u dhisnaa, oo u koraynaa.</p>
+      </div>
+    </section>
+
+    {# Sticky Bottom Bar with Link and Big Yellow Close Button #}
+    <div class="cpop-footer-bar">
+      <a href="/campaign.html" class="cpop-footer-bar__plan" data-so="Eeg qorshaha oo dhan &rarr;" data-en="See full plan &rarr;">Eeg qorshaha oo dhan &rarr;</a>
+      <button type="button" class="cpop-close-btn" data-so="Waan fahmay, waan diyaar u ahay inaan codeeyo" data-en="Understood and ready to Vote">Waan fahmay, waan diyaar u ahay inaan codeeyo</button>
+    </div>
+
+  </div>{# .cpop-dialog #}
+</div>{# .cpop-overlay #}
+<script src="{{ url_for('static', filename='js/campaign-popup.js') }}?v=4" defer></script>
+{% endif %}

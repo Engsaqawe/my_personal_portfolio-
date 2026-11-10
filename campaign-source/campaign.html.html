@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ku dooro Eng. Nur Ali Saqawe | Guddoomiyaha Ardayda CS &amp; IT</title>
+<meta name="description" content="Hufnaan iyo horumar muuqda, hogaan iyo himilo toosan. Ku dooro Engsaqawe, Guddoomiyaha Ardayda Kulliyadda Computer Science and IT, Hormuud University.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0b1a4a;--navy-2:#13266b;--yellow:#f5c400;--green:#1f9d4a;--white:#fff;--ink:#0b1a4a;--soft:#eef1fa}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"Archivo",system-ui,Arial,sans-serif;color:var(--ink);background:var(--white);line-height:1.6}
+  a{color:inherit}
+  button{font:inherit;cursor:pointer}
+  :focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+
+  /* top bar + language toggle */
+  .bar{background:var(--navy);color:var(--white);padding:10px 0;position:sticky;top:0;z-index:10}
+  .bar .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+  .bar a{text-decoration:none;font-weight:600}
+  .bar .right{display:flex;align-items:center;gap:12px}
+  .lang{display:flex;border:2px solid var(--yellow);border-radius:999px;overflow:hidden}
+  .lang button{background:transparent;color:var(--white);border:0;padding:6px 14px;font-weight:800}
+  .lang button[aria-pressed="true"]{background:var(--yellow);color:var(--navy)}
+  .bar .vote{background:var(--yellow);color:var(--navy);padding:8px 16px;border-radius:8px;font-weight:800}
+
+  /* hero */
+  .hero{background:var(--navy);color:var(--white);padding:56px 0 64px}
+  .hero .wrap{display:grid;grid-template-columns:1.2fr .8fr;gap:36px;align-items:center}
+  .hero small{color:var(--yellow);font-weight:800;font-size:1rem}
+  .hero h1{font-size:clamp(2.2rem,6vw,4rem);line-height:1.05;font-weight:900;margin:10px 0 14px}
+  .hero h1 span{color:var(--green);background:var(--white);padding:0 .15em;border-radius:6px}
+  .hero p.tag{font-size:1.2rem;max-width:34ch}
+  .hero p.tag b{color:var(--yellow)}
+  .hero img{width:100%;border-radius:14px;border:3px solid var(--yellow);display:block}
+  .cta{display:inline-block;margin-top:24px;background:var(--yellow);color:var(--navy);padding:14px 26px;border-radius:10px;font-weight:900;text-decoration:none}
+
+  .three{background:var(--yellow);color:var(--navy);padding:22px 0}
+  .three ul{list-style:none;display:flex;justify-content:space-around;gap:12px;flex-wrap:wrap;font-weight:900;font-size:1.4rem}
+
+  section{padding:64px 0}
+  h2{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:900;line-height:1.15;margin-bottom:10px}
+  .lead{max-width:62ch;margin-bottom:32px}
+
+  /* points */
+  .points{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+  .point{background:var(--soft);border-left:6px solid var(--green);padding:18px 20px;border-radius:0 12px 12px 0;scroll-margin-top:80px;transition:background .2s,border-color .2s,box-shadow .2s}
+  .point h3{font-size:1.1rem;margin-bottom:4px}
+  .point b{display:block;color:var(--green);margin-bottom:6px}
+  .point.on{background:#fff7d1;border-color:var(--yellow);box-shadow:0 0 0 3px var(--yellow)}
+
+  /* SUCCESS trail */
+  .trail{background:var(--navy);color:var(--white)}
+  .trail .lead{color:#dfe5ff}
+  .letters{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;position:relative;margin-bottom:26px}
+  .ltr{background:var(--navy-2);color:var(--white);border:3px solid transparent;border-radius:12px;font-weight:900;font-size:clamp(1.8rem,7vw,3.6rem);line-height:1;padding:14px 0}
+  .ltr:hover{border-color:var(--yellow)}
+  .ltr[aria-pressed="true"]{background:var(--yellow);color:var(--navy);border-color:var(--white)}
+  .stage{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;align-items:stretch}
+  .sticker{background:var(--yellow);color:var(--navy);border-radius:16px;padding:26px;transform:rotate(-1deg);box-shadow:0 8px 0 rgba(0,0,0,.25)}
+  .sticker .n{font-weight:800;opacity:.8}
+  .sticker .q{font-size:clamp(1.5rem,4vw,2.3rem);font-weight:900;line-height:1.15;margin:8px 0 18px}
+  .sticker .arrow{display:inline-block;background:var(--navy);color:var(--white);padding:10px 18px;border-radius:999px;font-weight:800}
+  .reveal{background:var(--navy-2);border:3px dashed var(--yellow);border-radius:16px;padding:24px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+  .reveal .lab{color:var(--yellow);font-weight:800}
+  .reveal .a{font-size:1.7rem;font-weight:900;line-height:1.15}
+  .reveal .p{color:#dfe5ff}
+  .reveal a,.next{align-self:flex-start;background:var(--yellow);color:var(--navy);border:0;border-radius:8px;padding:10px 16px;font-weight:800;text-decoration:none}
+  .next{margin-top:18px}
+  .answer{margin-top:32px;padding:22px;border:3px solid var(--yellow);border-radius:14px;font-size:1.25rem;font-weight:800}
+  .answer span{color:var(--yellow)}
+
+  .motto{text-align:center}
+  .motto p.big{font-size:clamp(1.5rem,4.5vw,2.6rem);font-weight:900;line-height:1.2;max-width:22ch;margin:0 auto}
+  .motto p.big em{font-style:normal;color:var(--green)}
+  .motto p.so{margin-top:12px;font-weight:600}
+
+  footer{background:var(--navy);color:var(--white);text-align:center;padding:40px 0}
+  footer .vote{display:inline-block;background:var(--yellow);color:var(--navy);font-weight:900;font-size:1.4rem;padding:12px 28px;border-radius:10px;margin-bottom:14px}
+
+  @media (max-width:760px){
+    .hero .wrap{grid-template-columns:1fr}
+    .three ul{flex-direction:column;text-align:center}
+    .stage{grid-template-columns:1fr}
+    .letters{gap:5px}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.point{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="wrap">
+    <a href="index.html">&larr; Engsaqawe.com</a>
+    <div class="right">
+      <div class="lang" role="group" aria-label="Language / Luuqad">
+        <button type="button" data-lang="so" aria-pressed="true">SO</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="vote" href="#ku-dooro" data-so="Ku dooro Engsaqawe" data-en="Vote Engsaqawe">Ku dooro Engsaqawe</a>
+    </div>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <small data-so="Guddoomiyaha Ardayda ee Kulliyadda Computer Science &amp; IT" data-en="Student Leader of the Faculty of Computer Science &amp; IT">Guddoomiyaha Ardayda ee Kulliyadda Computer Science &amp; IT</small>
+      <h1>Eng. Nur Ali <span>Saqawe</span></h1>
+      <p class="tag" data-so="<b>Hufnaan iyo horumar muuqda,</b> hogaan iyo himilo toosan." data-en="<b>Care and visible progress,</b> guidance and a clear goal."><b>Hufnaan iyo horumar muuqda,</b> hogaan iyo himilo toosan.</p>
+      <a class="cta" href="#ku-dooro" data-so="Eeg qorshahayga" data-en="See my plan">Eeg qorshahayga</a>
+    </div>
+    <!-- Save your poster as campaign-poster.png and upload it next to this file -->
+    <img src="C:\Users\Galbooy\Desktop\ENGSAQAWE\static\images\pictures" alt="Poster-ka ololaha Eng. Nur Ali Saqawe, Engsaqawe">
+  </div>
+</header>
+
+<div class="three">
+  <div class="wrap">
+    <ul>
+      <li>&#10003; <span data-so="Midnimo" data-en="Unity">Midnimo</span></li>
+      <li>&#10003; <span data-so="Masuuliyad" data-en="Responsibility">Masuuliyad</span></li>
+      <li>&#10003; <span data-so="Mashaariic" data-en="Projects">Mashaariic</span></li>
+    </ul>
+  </div>
+</div>
+
+<section id="ku-dooro">
+  <div class="wrap">
+    <h2 data-so="Sideed ballan oo aan ku siinayo" data-en="Eight promises I give you">Sideed ballan oo aan ku siinayo</h2>
+    <p class="lead" data-so="Waa sideed shay oo ardayga kasta u wanaagsan. Mid kasta waxaan ku raacinayaa shaqo, ma aha hadal oo kaliya." data-en="Eight things that are good for every student. I will follow each one with action, not only words.">Waa sideed shay oo ardayga kasta u wanaagsan. Mid kasta waxaan ku raacinayaa shaqo, ma aha hadal oo kaliya.</p>
+    <div class="points" id="points"></div>
+  </div>
+</section>
+
+<section class="trail" id="guul">
+  <div class="wrap">
+    <h2 data-so="Raac falaarta. Akhri xarfaha." data-en="Follow the arrow. Read the letters.">Raac falaarta. Akhri xarfaha.</h2>
+    <p class="lead" data-so="Haddii aad sticker-yadayada ku aragtay jaamacadda, waa kuwan jawaabtooda. Xarafka koowaad ee mid kasta isu geey." data-en="If you saw my stickers on campus, here are their answers. Put the first letter of each Somali sticker together and you get SUCCESS.">Haddii aad sticker-yadayada ku aragtay jaamacadda, waa kuwan jawaabtooda. Xarafka koowaad ee mid kasta isu geey.</p>
+
+    <div class="letters" id="letters" role="group" aria-label="SUCCESS"></div>
+
+    <div class="stage" aria-live="polite">
+      <div class="sticker">
+        <div class="n" id="sn"></div>
+        <div class="q" id="sq"></div>
+        <span class="arrow" id="sa"></span>
+      </div>
+      <div class="reveal">
+        <span class="lab" id="rl"></span>
+        <span class="a" id="ra"></span>
+        <span class="p" id="rp"></span>
+        <a id="rk" href="#p1"></a>
+      </div>
+    </div>
+    <button type="button" class="next" id="next"></button>
+
+    <p class="answer" data-so="<span>SUCCESS</span> waa wadajir. Wadajir baan wax u barannaa, wax u dhisnaa, oo u koraynaa." data-en="<span>SUCCESS</span> is togetherness. Together we learn, together we build, and together we grow."><span>SUCCESS</span> waa wadajir. Wadajir baan wax u barannaa, wax u dhisnaa, oo u koraynaa.</p>
+  </div>
+</section>
+
+<section class="motto">
+  <div class="wrap">
+    <p class="big">Together We <em>Learn</em>, Together We <em>Build</em>, Together We <em>Grow</em>.</p>
+    <p class="so">Wadajir baan wax u barannaa, wax u dhisnaa, oo u koraynaa.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="vote">VOTE Engsaqawe</p>
+    <p>Eng. Nur Ali Saqawe &middot; Computer Science &amp; IT &middot; Hormuud University</p>
+    <p>engsaqawe.com</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var POINTS=[
+    {so:["Hagidda Ardayda","Arday kasta oo cusub waa inuu qof hago helaa.","Hage waxbarasho iyo mentoring ah oo ardayda hoose ka caawiya inay gaaraan hadafkooda."],
+     en:["Student Guidance","Every new student gets a guide.","Academic guidance and mentoring so junior students reach their goals."]},
+    {so:["Communities Xirfadeed","Ardayda kugu xirfadaha iyo kugu xiisaha ah hel.","la caqabadaha recources-ka , fikradaha iyo shaqada intaba, si ay isoo baxaan natiijooyin dhab ah."],
+     en:["Skills-Based Community","Find students who share your skills.","Connect students by interest, skill, and field, so they learn and work together."]},
+    {so:["Wadaagidda Aqoonta","Waxa mid baro, dhammaan way baran karaan.","Ardayda ku dhiirri geli inay wadaagaan aqoon, fikrado iyo kheyraad waxbarasho."],
+     en:["Knowledge Sharing","What one student learns, all can learn.","Share ideas, notes, and learning resources."]},
+    {so:["Wada Shaqayn","Mashaariic waaweyn waxaa dhisa kooxo.","Taageer kooxaha, mashaariicda ardayda iyo isbarashada ardayda dhexdooda."],
+     en:["Collaboration","Big projects are built by teams.","Support teamwork, student projects, and peer-to-peer learning."]},
+    {so:["Horumarinta Xirfadaha","Shahaado iyo xirfad dhab ah.","Workshops, tababar gacan-ku-hay ah iyo tartamo teknoolajiyadeed oo u diyaariya ardayda suuqa shaqada."],
+     en:["Skills Development","A degree plus real skills.","Workshops, hands-on training, and technology competitions."]},
+    {so:["Matalaadda Ardayda","Codkaaga wuxuu gaaraa maamulka.","Waxaan abaabuli doonaa mashaariic ururinta fikrado-celin (feedback), kadibna natiijada u gudbin doonaa maamulka, anigoo ardayda u soo sheegaya waxa go'aansaday."],
+     en:["Student Representation","Your voice reaches management.","I will run feedback projects such as surveys and suggestion forms, present the results to management, and report back to students."]},
+    {so:["Agab iyo Goobo Waxbarasho","Kulliyad diyaar u ah waxbarasho tayo leh.","Waxaan soo jeedin doonaa maktabad wanaagsan, shaybaarro la qalabeeyey, agab gargaar degdeg ah iyo qolal waxbarasho oo habboon."],
+     en:["Facilities and Equipment","A faculty ready for quality learning.","I will propose a better library, equipped labs, first aid tools, and proper study rooms."]},
+    {so:["Hoggaan Muddo Dheer","Ballanqaadku waa inuu dhammaado.","Sannad saddexaad ayaan jiraa, markaa waan joogi doonaa sannadaha soo socda si shaqooyinka aan bilaabo aan u dhammaystiro."],
+     en:["Long-Term Leadership","A promise must be finished.","I am in my third year, so I will be here in the coming years to finish what I start."]}
+  ];
+  // p = index of the linked promise (0-based), null = the final answer
+  var STICKERS=[
+    {L:"S",p:1,so:"Saaxiibo xirfaddaada la mid ah ma haysaa?",en:"Do you have friends who share your skills?"},
+    {L:"U",p:0,so:"Ujeeddadaada ma cadahay?",en:"Is your goal clear?"},
+    {L:"C",p:3,so:"Cidda kula shaqayn lahayd mashruucaaga?",en:"Who would you work with on your project?"},
+    {L:"C",p:2,so:"Cilmigaaga ma la wadaagtaa?",en:"Do you share your knowledge?"},
+    {L:"E",p:5,so:"Ereyadaada ma gaadhaan maamulka?",en:"Do your words reach management?"},
+    {L:"S",p:4,so:"Sidee xirfaddaada u kobcin lahayd?",en:"How would you grow your skills?"},
+    {L:"S",p:null,so:"Si kaligaa ah guul ma gaadhi kartaa?",en:"Can you reach success alone?"}
+  ];
+  var UI={
+    so:{n:"Sticker-ka",of:"ee",arrow:"Raac falaarta \u2192",ans:"Jawaabta:",see:"Eeg ballanka",next:"Sticker-ka xiga \u2192",together:"Wadajir",togetherP:"Guul waa wadajir."},
+    en:{n:"Sticker",of:"of",arrow:"Follow the arrow \u2192",ans:"The answer:",see:"See the promise",next:"Next sticker \u2192",together:"Together",togetherP:"Success is togetherness."}
+  };
+  var lang="so", idx=0;
+  try{var saved=localStorage.getItem("campaign-lang"); if(saved==="en"||saved==="so"){lang=saved;}}catch(e){}
+
+  var $=function(id){return document.getElementById(id)};
+  var pointsEl=$("points"), lettersEl=$("letters");
+
+  function buildPoints(){
+    pointsEl.innerHTML="";
+    POINTS.forEach(function(p,i){
+      var d=p[lang], el=document.createElement("div");
+      el.className="point"; el.id="p"+(i+1);
+      el.innerHTML="<h3>"+(i+1)+". "+d[0]+"</h3><b>"+d[1]+"</b><p>"+d[2]+"</p>";
+      pointsEl.appendChild(el);
+    });
+  }
+  function buildLetters(){
+    lettersEl.innerHTML="";
+    STICKERS.forEach(function(s,i){
+      var b=document.createElement("button");
+      b.type="button"; b.className="ltr"; b.textContent=s.L;
+      b.setAttribute("aria-label",UI[lang].n+" "+(i+1)+": "+s.L);
+      b.addEventListener("click",function(){idx=i;renderTrail();});
+      lettersEl.appendChild(b);
+    });
+  }
+  function renderTrail(){
+    var u=UI[lang], s=STICKERS[idx];
+    Array.prototype.forEach.call(lettersEl.children,function(b,i){b.setAttribute("aria-pressed",i===idx?"true":"false");});
+    $("sn").textContent=u.n+" "+(idx+1)+" "+u.of+" "+STICKERS.length;
+    $("sq").textContent=s[lang];
+    $("sa").textContent=u.arrow;
+    $("rl").textContent=u.ans;
+    $("next").textContent=u.next;
+    Array.prototype.forEach.call(pointsEl.children,function(c){c.classList.remove("on");});
+    if(s.p===null){
+      $("ra").textContent=u.together; $("rp").textContent=u.togetherP; $("rk").style.display="none";
+    }else{
+      var d=POINTS[s.p][lang];
+      $("ra").textContent=d[0]; $("rp").textContent=d[1];
+      $("rk").style.display=""; $("rk").textContent=u.see; $("rk").href="#p"+(s.p+1);
+      pointsEl.children[s.p].classList.add("on");
+    }
+  }
+  function applyText(){
+    document.documentElement.lang=lang;
+    Array.prototype.forEach.call(document.querySelectorAll("[data-so]"),function(el){
+      el.innerHTML=el.getAttribute("data-"+lang);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".lang button"),function(b){
+      b.setAttribute("aria-pressed",b.getAttribute("data-lang")===lang?"true":"false");
+    });
+    document.title= lang==="so" ? "Ku dooro Eng. Nur Ali Saqawe | Guddoomiyaha Ardayda CS & IT" : "Vote Eng. Nur Ali Saqawe | Student Leader, CS & IT";
+    buildPoints(); buildLetters(); renderTrail();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".lang button"),function(b){
+    b.addEventListener("click",function(){
+      lang=b.getAttribute("data-lang");
+      try{localStorage.setItem("campaign-lang",lang);}catch(e){}
+      applyText();
+    });
+  });
+  $("next").addEventListener("click",function(){idx=(idx+1)%STICKERS.length;renderTrail();});
+  applyText();
+})();
+</script>
+</body>
+</html>

@@ -4,19 +4,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ profile.brand_name if profile else 'ENGSAQAWE' }} — Portfolio</title>
-  <meta name="description" content="{{ settings.get('meta_description', 'ENGSAQAWE portfolio') }}" />
+  <title>{{ profile.full_name if profile else 'Nuur Cali Saqawe' }} | {{ profile.brand_name if profile else 'ENGSAQAWE' }} — {{ settings.get('job_title', 'Full-Stack Web Developer and Virtual Assistant') }}</title>
+  <meta name="description" content="{{ settings.get('meta_description') or 'Nuur Cali Saqawe (ENGSAQAWE) is a full-stack web developer and virtual assistant offering web development, digital systems, Somali-English translation, transcription, and online teaching.' }}" />
+  <link rel="canonical" href="{{ settings.get('site_url', 'https://engsaqawe.com').rstrip('/') }}/" />
   <meta name="theme-color" content="#0a101f" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="{{ profile.brand_name if profile else 'ENGSAQAWE' }} — {{ settings.get('job_title', 'Software Engineering') }}" />
-  <meta property="og:description" content="{{ profile.tagline if profile else 'Developer · Builder · Educator' }}" />
-  <meta property="og:url" content="{{ settings.get('site_url', 'https://engsaqawe.com') }}" />
-  <meta property="og:image" content="{{ settings.get('site_url', 'https://engsaqawe.com') }}/static/{{ settings.get('og_image_path', 'images/pictures/me.png') }}" />
+  <meta property="og:title" content="{{ profile.full_name if profile else 'Nuur Cali Saqawe' }} | {{ profile.brand_name if profile else 'ENGSAQAWE' }} — {{ settings.get('job_title', 'Full-Stack Web Developer and Virtual Assistant') }}" />
+  <meta property="og:description" content="{{ settings.get('meta_description') or 'Full-stack web development, digital systems, Somali-English translation, transcription, and online teaching.' }}" />
+  <meta property="og:url" content="{{ settings.get('site_url', 'https://engsaqawe.com').rstrip('/') }}/" />
+  <meta property="og:image" content="{{ settings.get('site_url', 'https://engsaqawe.com').rstrip('/') }}/static/{{ settings.get('og_image_path', 'images/pictures/me.png').lstrip('/') }}" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="{{ profile.brand_name if profile else 'ENGSAQAWE' }}" />
-  <meta name="twitter:description" content="{{ profile.tagline if profile else 'Developer · Builder · Educator' }}" />
+  <meta name="twitter:title" content="{{ profile.full_name if profile else 'Nuur Cali Saqawe' }} | {{ profile.brand_name if profile else 'ENGSAQAWE' }}" />
+  <meta name="twitter:description" content="{{ settings.get('meta_description') or 'Full-stack web development, digital systems, Somali-English translation, transcription, and online teaching.' }}" />
 
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}" />
 
@@ -38,24 +39,25 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=portfolio-story-1" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=seo-1" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/project-stack.css') }}?v=15" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/services.css') }}?v=1" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/affiliates.css') }}?v=2" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/home-selective-design.css') }}?v=1" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/site-features.css') }}?v=1" />
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "{{ profile.full_name if profile else 'Nor Ali Saqawe' }}",
-      "alternateName": "{{ profile.brand_name if profile else 'ENGSAQAWE' }}",
-      "url": "{{ settings.get('site_url', 'https://engsaqawe.com') }}",
-      "image": "{{ settings.get('site_url', 'https://engsaqawe.com') }}/static/{{ settings.get('og_image_path', 'images/pictures/me.png') }}",
-      "jobTitle": "{{ settings.get('job_title', 'Software Engineer') }}",
-      "description": "{{ profile.hero_subtitle if profile else 'Premium software engineering and digital systems.' }}"
-    }
-  </script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/campaign-popup.css') }}?v=4" />
+  {% set person_schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    'name': profile.full_name if profile else 'Nuur Cali Saqawe',
+    'alternateName': profile.brand_name if profile else 'ENGSAQAWE',
+    'url': settings.get('site_url', 'https://engsaqawe.com'),
+    'image': settings.get('site_url', 'https://engsaqawe.com').rstrip('/') ~ '/static/' ~ settings.get('og_image_path', 'images/pictures/me.png').lstrip('/'),
+    'jobTitle': settings.get('job_title', 'Full-Stack Web Developer and Virtual Assistant'),
+    'description': settings.get('meta_description') or 'Full-stack web developer and virtual assistant offering web development, digital systems, Somali-English translation, transcription, and online teaching.',
+    'knowsAbout': ['Full-stack web development', 'Web application development', 'Digital systems', 'Virtual assistance', 'Somali-English translation', 'Transcription', 'Online teaching'] + (services|map(attribute='title')|list)
+  } %}
+  <script type="application/ld+json">{{ person_schema|tojson }}</script>
 </head>
 
 <body>
@@ -193,6 +195,7 @@
           <p class="hero__subtitle pop-up-text">
             {{ profile.hero_subtitle if profile and profile.hero_subtitle else 'I make websites, apps, and systems. This is my work.' }}
           </p>
+          <p class="hero__seo-copy">{{ settings.get('seo_intro') or 'I’m a full-stack web developer and virtual assistant offering web and system development, Somali-English translation, transcription, and online teaching.' }}</p>
 
           <div class="hero__actions pop-up-text">
             <button class="btn btn--primary magnetic" data-scroll-to="#portfolio">
@@ -228,7 +231,7 @@
           <div class="hero__portrait-wrap tilt-card" data-tilt data-tilt-max="10">
             <div class="hero__portrait-glow"></div>
             <img src="{{ url_for('static', filename=hero_image) }}"
-              alt="{{ profile.full_name if profile else 'Nor Ali Saqawe' }}, professional portrait"
+              alt="{{ profile.full_name if profile else 'Nuur Cali Saqawe' }}, professional portrait"
               class="hero__portrait" width="520" height="650" loading="eager" />
             <div class="hero__portrait-badge glass">
               <i class="fa-solid fa-code"></i>
@@ -265,13 +268,13 @@
       <div class="section__header container">
         <h2 class="section__title split-title pop-up-text">{{ about_st[0] }} <span class="text-accent">{{ about_st[1] }}</span></h2>
         <p class="eyebrow pop-up-text">{{ settings.get('about_eyebrow', 'About') }}</p>
-        <p class="section__subtitle pop-up-text">{{ settings.get('about_intro') or ((profile.full_name if profile else 'Nor Ali Saqawe') ~ ' — ' ~ (profile.tagline if profile else 'Developer · Builder · Educator')) }}</p>
+        <p class="section__subtitle pop-up-text">{{ settings.get('about_intro') or ((profile.full_name if profile else 'Nuur Cali Saqawe') ~ ' — ' ~ (profile.tagline if profile else 'Developer · Builder · Educator')) }}</p>
       </div>
 
       <div class="about__grid container">
         <div class="about__gallery">
           <div class="about__gallery-main tilt-card" data-tilt data-tilt-max="8">
-            <img src="{{ url_for('static', filename=gallery[0].image_url if gallery else hero_image) }}" alt="Nor Ali Saqawe portrait"
+            <img src="{{ url_for('static', filename=gallery[0].image_url if gallery else hero_image) }}" alt="{{ profile.full_name if profile else 'Nuur Cali Saqawe' }} portrait"
               class="about__photo about__photo--main" loading="lazy" />
           </div>
           <div class="about__gallery-strip">
@@ -722,7 +725,7 @@
           <img src="{{ url_for('static', filename='images/logo1.svg') }}?v=4" alt="" class="logo-flip__img logo-flip__img--b" width="36" height="36" aria-hidden="true" />
         </span>
         <span class="footer__logo">{{ profile.brand_name if profile else 'ENGSAQAWE' }}</span>
-        <p>© <span id="year"></span> {{ profile.full_name if profile else 'Nor Ali Saqawe' }}. {{ settings.get('footer_rights', 'All rights reserved.') }}</p>
+        <p>© <span id="year"></span> {{ profile.full_name if profile else 'Nuur Cali Saqawe' }}. {{ settings.get('footer_rights', 'All rights reserved.') }}</p>
         <a href="{{ url_for('admin.login') }}" class="footer__admin-link"><i class="fa-solid fa-lock"></i> {{ settings.get('footer_admin_label', 'Admin login') }}</a>
         <div class="footer__social">
           {% for item in footer_social_links %}<a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ item.label }}"><i class="{{ item.icon }}" aria-hidden="true"></i></a>{% endfor %}
@@ -810,6 +813,7 @@
   <script src="{{ url_for('static', filename='js/project-stack.js') }}?v=12" defer></script>
   <script src="{{ url_for('static', filename='js/services.js') }}?v=1" defer></script>
   <script src="{{ url_for('static', filename='js/chat-widget.js') }}?v=1" defer></script>
+  {% include '_campaign_popup.html' %}
 </body>
 
 </html>

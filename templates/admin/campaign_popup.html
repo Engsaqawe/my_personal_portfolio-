@@ -1,0 +1,33 @@
+{% extends "admin/base.html" %}
+{% block title %}Campaign Popup{% endblock %}
+{% block content %}
+<header class="admin-header">
+  <div>
+    <h1>Campaign Popup</h1>
+    <p>Control the election campaign popup shown to visitors on the home page.</p>
+  </div>
+</header>
+
+<form class="admin-card admin-form" method="POST" id="campaign-form">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+  <label class="admin-form__full" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+    <input type="checkbox" name="campaign_enabled" value="1" {% if settings.get('campaign_enabled') == '1' %}checked{% endif %} style="width:20px;height:20px">
+    <span style="font-weight:600">Enable campaign popup</span>
+  </label>
+
+  <label class="admin-form__full">
+    Election end date
+    <input type="date" name="campaign_end_date" value="{{ settings.get('campaign_end_date', '') }}">
+    <small style="color:#888">The popup will never show after this date (Africa/Mogadishu time zone).</small>
+  </label>
+
+  <label class="admin-form__full">
+    Hide popup after close (hours)
+    <input type="number" name="campaign_hide_hours" min="0" max="8760" step="1" value="{{ settings.get('campaign_hide_hours', '24') }}">
+    <small style="color:#888">After a visitor closes the popup, it will not appear again for this many hours. Default: 24.</small>
+  </label>
+
+  <button type="submit" class="admin-btn admin-btn--primary" style="margin-top:1rem">Save campaign settings</button>
+</form>
+{% endblock %}

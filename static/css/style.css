@@ -3727,3 +3727,12 @@ html[data-theme="light"] .footer {
 @media (prefers-reduced-motion: reduce) {
   .project-card--slide { opacity: 1; transform: none; transition: none; }
 }
+
+.hero__seo-copy {
+  max-width: 62ch;
+  margin: .9rem 0 0;
+  color: var(--muted);
+  font-size: .88rem;
+  line-height: 1.7;
+  font-weight: 600;
+}

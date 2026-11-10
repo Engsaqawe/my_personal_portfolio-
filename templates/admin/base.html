@@ -35,6 +35,7 @@
       <a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint == 'admin.dashboard' %}is-active{% endif %}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
       <a href="{{ url_for('admin.profile_edit') }}" class="{% if request.endpoint == 'admin.profile_edit' %}is-active{% endif %}"><i class="fa-solid fa-user"></i> Profile & Text</a>
       <a href="{{ url_for('admin.site_settings') }}" class="{% if request.endpoint == 'admin.site_settings' %}is-active{% endif %}"><i class="fa-solid fa-sliders"></i> Site Settings</a>
+      <a href="{{ url_for('admin.campaign_popup') }}" class="{% if request.endpoint == 'admin.campaign_popup' %}is-active{% endif %}"><i class="fa-solid fa-bullhorn"></i> Campaign Popup</a>
       <a href="{{ url_for('admin.projects_list') }}" class="{% if 'project' in request.endpoint %}is-active{% endif %}"><i class="fa-solid fa-folder-open"></i> Projects</a>
       <a href="{{ url_for('admin.services_list') }}" class="{% if 'service' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-briefcase"></i> Services</a>
       <a href="{{ url_for('admin.affiliates_list') }}" class="{% if 'affiliate' in (request.endpoint or '') %}is-active{% endif %}"><i class="fa-solid fa-handshake"></i> Affiliate Links</a>

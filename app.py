@@ -718,5 +718,39 @@ def sitemap():
     return Response(xml, mimetype="application/xml; charset=utf-8")
 
 
+# ---------- Campaign page (static HTML, not Jinja) ----------
+@app.route("/campaign")
+@app.route("/campaign.html")
+def campaign_page():
+    from flask import send_from_directory
+    return send_from_directory(app.root_path, "campaign.html")
+
+
+# ---------- Campaign settings — public read-only JSON ----------
+@app.route("/api/campaign-settings")
+def campaign_settings_api():
+    try:
+        rows = query_all(
+            "SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('campaign_enabled','campaign_end_date','campaign_hide_hours')"
+        )
+    except Exception:
+        rows = []
+    data = {row["setting_key"]: row["setting_value"] for row in rows}
+    hide_hours = 24
+    if data.get("campaign_hide_hours"):
+        try:
+            hide_hours = max(0, int(data["campaign_hide_hours"]))
+        except (ValueError, TypeError):
+            hide_hours = 24
+    result = {
+        "enabled": data.get("campaign_enabled") == "1",
+        "endDate": data.get("campaign_end_date") or "",
+        "hideHours": hide_hours,
+    }
+    resp = jsonify(result)
+    resp.headers["Cache-Control"] = "public, max-age=30, must-revalidate"
+    return resp
+
+
 if __name__ == "__main__":
     app.run(debug=(APP_ENV != "production"), host="127.0.0.1", port=5000)

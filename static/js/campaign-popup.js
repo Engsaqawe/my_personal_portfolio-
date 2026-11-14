@@ -44,22 +44,31 @@
     return true;                                              // shows whenever page is refreshed/visited
   }
 
-  /* fast decision from cache */
-  if (cached && cached._ts && (Date.now() - cached._ts < 60000)) {
-    if (shouldShow(cached)) initPopup();
-    return;                                                   // fresh cache, skip fetch
-  }
+  var overlayEl = document.getElementById("cpop-overlay");
+  if (!overlayEl) return;
 
-  /* if we have stale cache, decide immediately but also refresh */
-  var showedFromCache = false;
-  if (cached && shouldShow(cached)) {
-    showedFromCache = true;
+  var domCfg = {
+    enabled: overlayEl.getAttribute("data-enabled") === "1" || overlayEl.getAttribute("data-enabled") === "true",
+    endDate: overlayEl.getAttribute("data-end-date") || "",
+    hideHours: Number(overlayEl.getAttribute("data-hide-hours")) || 24
+  };
+
+  /* 1. Immediate decision from server-rendered DOM attributes */
+  var showed = false;
+  if (shouldShow(domCfg)) {
+    showed = true;
     initPopup();
   }
 
-  /* fetch fresh settings (timeout 2 s) */
+  /* 2. Fast fallback from local cache if DOM attributes were empty */
+  if (!showed && cached && shouldShow(cached)) {
+    showed = true;
+    initPopup();
+  }
+
+  /* 3. Refresh in background via API */
   var controller;
-  try { controller = new AbortController(); setTimeout(function () { controller.abort(); }, 2000); } catch (e) { controller = null; }
+  try { controller = new AbortController(); setTimeout(function () { controller.abort(); }, 3000); } catch (e) { controller = null; }
   var fetchOpts = { cache: "no-store" };
   if (controller) fetchOpts.signal = controller.signal;
 
@@ -69,10 +78,15 @@
       .then(function (cfg) {
         cfg._ts = Date.now();
         storageSet(CACHE_KEY, JSON.stringify(cfg));
-        if (!showedFromCache && shouldShow(cfg)) initPopup();
-        if (showedFromCache && !shouldShow(cfg)) removePopup();
+        if (!showed && shouldShow(cfg)) {
+          showed = true;
+          initPopup();
+        }
+        if (showed && !shouldShow(cfg)) {
+          removePopup();
+        }
       })
-      .catch(function () { /* silently fail; popup stays based on cache decision */ });
+      .catch(function () { /* silently fail; popup stays based on DOM/cache decision */ });
   } catch (e) { /* fetch not available */ }
 
   /* ---- build popup DOM & Interactivity ---- */

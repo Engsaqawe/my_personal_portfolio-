@@ -1,6 +1,6 @@
 {# Campaign popup — styled exactly like campaign.html, wide on desktop, responsive on mobile. #}
 {% if settings.get('campaign_enabled') == '1' and settings.get('campaign_end_date') %}
-<div id="cpop-overlay" class="cpop-overlay" style="display:none">
+<div id="cpop-overlay" class="cpop-overlay" data-enabled="{{ settings.get('campaign_enabled', '0') }}" data-end-date="{{ settings.get('campaign_end_date', '') }}" data-hide-hours="{{ settings.get('campaign_hide_hours', '24') }}" style="display:none">
   <div class="cpop-dialog" role="dialog" aria-modal="true" aria-label="Campaign — Eng. Nur Ali Saqawe" tabindex="-1">
 
     {# Top Sticky Navigation Bar #}
@@ -97,10 +97,10 @@
     {# Sticky Bottom Bar with Link and Big Yellow Close Button #}
     <div class="cpop-footer-bar">
       <a href="/campaign.html" class="cpop-footer-bar__plan" data-so="Eeg qorshaha oo dhan &rarr;" data-en="See full plan &rarr;">Eeg qorshaha oo dhan &rarr;</a>
-      <button type="button" class="cpop-close-btn" data-so="Waan fahmay, waan diyaar u ahay inaan codeeyo" data-en="Understood and ready to Vote">Waan fahmay, waan diyaar u ahay inaan codeeyo</button>
+      <button type="button" class="cpop-close-btn" data-so="Waan fahmay, waan diyaar u ahay inaan codeeyo" data-en="Understood and ready to Vote">diyaar baan u ahay inaan codeeyo</button>
     </div>
 
   </div>{# .cpop-dialog #}
 </div>{# .cpop-overlay #}
-<script src="{{ url_for('static', filename='js/campaign-popup.js') }}?v=4" defer></script>
+<script src="{{ url_for('static', filename='js/campaign-popup.js') }}?v=5" defer></script>
 {% endif %}
